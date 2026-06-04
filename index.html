@@ -1,0 +1,2082 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BuildSmart — Estimación de Costos de Construcción</title>
+  <meta name="description" content="Plataforma profesional de estimación de costos de construcción. Calcula materiales, gestiona proyectos y aprende con guías expertas." />
+  <!-- ═══════════════════════════════════════════════════════
+       PWA: META TAGS — Definen comportamiento nativo al instalar.
+       theme-color: color de la barra del sistema operativo.
+       apple-mobile-web-app-capable: activa el modo pantalla completa en iOS.
+       apple-mobile-web-app-status-bar-style: color del status bar en iOS.
+  ═══════════════════════════════════════════════════════ -->
+  <meta name="theme-color" content="#005aff" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="BuildSmart" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="msapplication-TileColor" content="#005aff" />
+  <meta name="msapplication-tap-highlight" content="no" />
+
+  <!-- PWA: MANIFEST — El navegador lo lee para nombre, íconos y modo display -->
+  <link rel="manifest" id="pwa-manifest-link" />
+
+  <!-- PWA: APPLE TOUCH ICON — iOS no usa el manifest para íconos -->
+  <link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%23005aff'/%3E%3Ctext x='90' y='125' text-anchor='middle' font-family='Arial Black' font-size='110' font-weight='900' fill='white'%3EB%3C/text%3E%3C/svg%3E" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23005aff'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='Arial Black' font-size='20' font-weight='900' fill='white'%3EB%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Firebase SDKs -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getAuth,
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      signOut,
+      onAuthStateChanged,
+      updateProfile,
+      sendPasswordResetEmail
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import {
+      getDatabase,
+      ref,
+      set,
+      get,
+      push,
+      remove,
+      onValue,
+      update
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+    // ── Firebase Config ──────────────────────────────────────────────
+    const firebaseConfig = {
+      apiKey: "AIzaSyB1LozSlXJhESrDoC38ZE9ukNraulgyUkU",
+      authDomain: "bdfirebase-62a1b.firebaseapp.com",
+      databaseURL: "https://bdfirebase-62a1b-default-rtdb.firebaseio.com",
+      projectId: "bdfirebase-62a1b",
+      storageBucket: "bdfirebase-62a1b.firebasestorage.app",
+      messagingSenderId: "862846715518",
+      appId: "1:862846715518:web:39d9b85b418c9dfccc3a2f",
+      measurementId: "G-Y2Q5JPNQC8"
+    };
+
+    const app  = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db   = getDatabase(app);
+
+    // Exponer al scope global para que el JS tradicional los use
+    window._fb = { auth, db, ref, set, get, push, remove, onValue, update,
+      createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut,
+      onAuthStateChanged, updateProfile, sendPasswordResetEmail };
+
+    // Auth state listener
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        window.currentUser = user;
+        window.onUserLoggedIn(user);
+      } else {
+        window.currentUser = null;
+        window.onUserLoggedOut();
+      }
+    });
+  </script>
+
+  <style>
+    :root {
+      --bg: #f5f7fa;
+      --fg: #0f172a;
+      --card: #ffffff;
+      --muted: #e9edf2;
+      --muted-fg: #64748b;
+      --border: #dde3ec;
+      --primary: hsl(215,100%,45%);
+      --primary-fg: #f0f6ff;
+      --secondary: hsl(30,100%,50%);
+      --radius: 0.5rem;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg);
+      color: var(--fg);
+      background-image:
+        linear-gradient(to right, rgba(15,23,42,0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(15,23,42,0.05) 1px, transparent 1px);
+      background-size: 40px 40px;
+      background-attachment: fixed;
+      min-height: 100vh;
+    }
+    h1,h2,h3,h4,h5,h6 { font-family: 'Oswald', sans-serif; text-transform: uppercase; letter-spacing: -0.02em; }
+    .page { display: none; min-height: calc(100vh - 60px); }
+    .page.active { display: block; }
+
+    /* ── AUTH SCREEN ─────────────────────────────────────────────── */
+    #auth-screen {
+      position: fixed; inset: 0; z-index: 9999;
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%);
+      display: flex; align-items: center; justify-content: center;
+      padding: 1rem;
+      background-image:
+        radial-gradient(ellipse at 20% 50%, rgba(0,90,255,0.15) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%, rgba(255,128,0,0.1) 0%, transparent 50%),
+        linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: auto, auto, 40px 40px, 40px 40px;
+    }
+    #auth-screen.hidden { display: none; }
+
+    .auth-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 1.25rem;
+      padding: 2.5rem 2.2rem;
+      width: 100%;
+      max-width: 420px;
+      backdrop-filter: blur(24px);
+      box-shadow: 0 32px 80px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05);
+      animation: authCardIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    @keyframes authCardIn {
+      from { opacity: 0; transform: translateY(28px) scale(0.96); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .auth-logo {
+      display: flex; align-items: center; gap: 0.55rem;
+      margin-bottom: 2rem; justify-content: center;
+    }
+    .auth-logo-icon {
+      background: var(--primary); color: white;
+      border-radius: 8px; width: 36px; height: 36px;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-family: 'Oswald', sans-serif; font-size: 1.1rem; font-weight: 800;
+      box-shadow: 0 4px 14px rgba(0,90,255,0.4);
+    }
+    .auth-logo-text {
+      font-family: 'Oswald', sans-serif; font-size: 1.55rem;
+      font-weight: 700; color: white; text-transform: none;
+    }
+    .auth-logo-text span { color: var(--primary); }
+
+    .auth-tabs {
+      display: flex; gap: 0; margin-bottom: 1.8rem;
+      background: rgba(255,255,255,0.07); border-radius: 0.6rem; padding: 4px;
+    }
+    .auth-tab {
+      flex: 1; padding: 0.5rem; text-align: center;
+      font-size: 0.82rem; font-weight: 600; cursor: pointer;
+      border-radius: 0.45rem; color: rgba(255,255,255,0.5);
+      transition: all 0.2s; border: none; background: transparent;
+    }
+    .auth-tab.active {
+      background: rgba(255,255,255,0.12); color: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    .auth-input-group { margin-bottom: 1rem; }
+    .auth-label {
+      display: block; font-size: 0.75rem; font-weight: 600;
+      color: rgba(255,255,255,0.6); margin-bottom: 0.4rem;
+      text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .auth-input {
+      width: 100%; padding: 0.7rem 0.9rem;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 0.5rem; color: white;
+      font-family: 'Inter', sans-serif; font-size: 0.9rem;
+      outline: none; transition: all 0.2s;
+    }
+    .auth-input::placeholder { color: rgba(255,255,255,0.3); }
+    .auth-input:focus {
+      border-color: rgba(0,120,255,0.7);
+      background: rgba(255,255,255,0.1);
+      box-shadow: 0 0 0 3px rgba(0,90,255,0.2);
+    }
+    .auth-input.error { border-color: rgba(239,68,68,0.7); }
+
+    .auth-btn-primary {
+      width: 100%; padding: 0.82rem;
+      background: var(--primary); color: white;
+      border: none; border-radius: 0.55rem;
+      font-family: 'Inter', sans-serif; font-size: 0.9rem; font-weight: 700;
+      cursor: pointer; transition: all 0.2s; margin-top: 0.5rem;
+      box-shadow: 0 4px 16px rgba(0,90,255,0.35);
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    }
+    .auth-btn-primary:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,90,255,0.45); }
+    .auth-btn-primary:active { transform: translateY(0); }
+    .auth-btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    .auth-divider {
+      text-align: center; margin: 1.3rem 0 0.8rem;
+      font-size: 0.75rem; color: rgba(255,255,255,0.3);
+      position: relative;
+    }
+    .auth-divider::before, .auth-divider::after {
+      content: ''; position: absolute; top: 50%;
+      width: calc(50% - 1.5rem); height: 1px;
+      background: rgba(255,255,255,0.1);
+    }
+    .auth-divider::before { left: 0; }
+    .auth-divider::after { right: 0; }
+
+    .auth-forgot {
+      text-align: right; margin-top: -0.4rem; margin-bottom: 0.8rem;
+    }
+    .auth-forgot a {
+      font-size: 0.75rem; color: rgba(0,150,255,0.85);
+      cursor: pointer; text-decoration: none;
+    }
+    .auth-forgot a:hover { color: white; }
+
+    .auth-error {
+      background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3);
+      color: #fca5a5; border-radius: 0.5rem; padding: 0.65rem 0.85rem;
+      font-size: 0.82rem; margin-bottom: 0.8rem; display: none;
+    }
+    .auth-error.show { display: block; }
+
+    .auth-success {
+      background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3);
+      color: #86efac; border-radius: 0.5rem; padding: 0.65rem 0.85rem;
+      font-size: 0.82rem; margin-bottom: 0.8rem; display: none;
+    }
+    .auth-success.show { display: block; }
+
+    .auth-footer {
+      text-align: center; margin-top: 1.5rem;
+      font-size: 0.75rem; color: rgba(255,255,255,0.3);
+    }
+
+    /* ── SPINNER ─────────────────────────────────────────────────── */
+    .spinner {
+      width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white; border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── APP LOADING OVERLAY ──────────────────────────────────────── */
+    #app-loading {
+      position: fixed; inset: 0; z-index: 9998;
+      background: #0f172a; display: flex; align-items: center; justify-content: center;
+      transition: opacity 0.4s;
+    }
+    #app-loading.hidden { opacity: 0; pointer-events: none; }
+    .app-loading-inner { text-align: center; }
+    .app-loading-icon {
+      background: var(--primary); color: white;
+      border-radius: 12px; width: 52px; height: 52px;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-family: 'Oswald', sans-serif; font-size: 1.5rem; font-weight: 800;
+      margin: 0 auto 1rem;
+      box-shadow: 0 8px 28px rgba(0,90,255,0.4);
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100% { box-shadow: 0 8px 28px rgba(0,90,255,0.4); } 50% { box-shadow: 0 8px 40px rgba(0,90,255,0.8); } }
+    .app-loading-text { color: rgba(255,255,255,0.5); font-size: 0.85rem; }
+
+    /* ── BUTTONS ─────────────────────────────────────────────────── */
+    .btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.6rem 1.3rem; border-radius: var(--radius); font-family: 'Inter', sans-serif; font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: all 0.2s; border: none; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,90,255,0.25); }
+    .btn-secondary { background: var(--secondary); color: white; }
+    .btn-secondary:hover { opacity: 0.88; }
+    .btn-outline { background: transparent; color: var(--fg); border: 2px solid var(--border) !important; }
+    .btn-outline:hover { border-color: var(--primary) !important; color: var(--primary); }
+    .btn-ghost { background: transparent; color: var(--muted-fg); border: none !important; }
+    .btn-ghost:hover { background: var(--muted); color: var(--fg); }
+    .btn-white { background: white; color: var(--primary); }
+    .btn-white:hover { background: #f0f6ff; }
+    .btn-danger-sm { background: #fee2e2; color: #dc2626; border: none; border-radius: 0.3rem; padding: 0.3rem 0.5rem; cursor: pointer; transition: background 0.2s; display: inline-flex; align-items: center; }
+    .btn-danger-sm:hover { background: #fca5a5; }
+
+    /* ── CARD ────────────────────────────────────────────────────── */
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 0.75rem; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+
+    /* ── INPUTS ──────────────────────────────────────────────────── */
+    .input, .textarea, .select-inp {
+      width: 100%; padding: 0.55rem 0.85rem; border: 1px solid var(--border);
+      border-radius: var(--radius); font-family: 'Inter', sans-serif; font-size: 0.88rem;
+      background: var(--card); color: var(--fg); transition: border-color 0.2s; outline: none;
+    }
+    .input:focus, .textarea:focus, .select-inp:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,90,255,0.1); }
+    .textarea { resize: vertical; min-height: 80px; }
+    .select-inp { cursor: pointer; appearance: auto; }
+    .label { font-size: 0.82rem; font-weight: 600; color: var(--fg); margin-bottom: 0.35rem; display: block; }
+
+    /* ── BADGES ──────────────────────────────────────────────────── */
+    .badge { display: inline-flex; align-items: center; padding: 0.18rem 0.55rem; border-radius: 999px; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+    .badge-blue { background: #dbeafe; color: #1d4ed8; }
+    .badge-green { background: #dcfce7; color: #16a34a; }
+    .badge-orange { background: #ffedd5; color: #c2410c; }
+
+    /* ── MODAL ───────────────────────────────────────────────────── */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal { background: var(--card); border-radius: 0.85rem; padding: 1.8rem 2rem; width: 90%; max-width: 520px; box-shadow: 0 25px 60px rgba(0,0,0,0.2); transform: scale(0.96); transition: transform 0.2s; }
+    .modal-overlay.open .modal { transform: scale(1); }
+
+    /* ── NAV ─────────────────────────────────────────────────────── */
+    .nav-link { cursor: pointer; color: var(--muted-fg); font-weight: 500; font-size: 0.88rem; transition: color 0.2s; padding: 0.3rem 0; text-decoration: none; }
+    .nav-link:hover, .nav-link.active { color: var(--primary); }
+
+    /* ── TOAST ───────────────────────────────────────────────────── */
+    .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 200; background: var(--fg); color: white; padding: 0.7rem 1.2rem; border-radius: 0.5rem; font-size: 0.85rem; box-shadow: 0 8px 24px rgba(0,0,0,0.25); transform: translateY(80px); opacity: 0; transition: all 0.3s; min-width: 220px; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { background: #16a34a; }
+    .toast.error-t { background: #dc2626; }
+
+    /* ── ANIMATIONS ──────────────────────────────────────────────── */
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+    .anim { animation: fadeInUp 0.5s ease-out both; }
+
+    /* ── GUIDE CARDS ─────────────────────────────────────────────── */
+    .guide-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; display: block; }
+    .guide-card:hover .guide-img { transform: scale(1.06); }
+    .guide-card { cursor: pointer; transition: all 0.3s; }
+    .guide-card:hover { box-shadow: 0 16px 40px rgba(0,0,0,0.12); transform: translateY(-4px); }
+
+    /* ── PROJECT CARDS ───────────────────────────────────────────── */
+    .proj-card { cursor: pointer; transition: all 0.25s; }
+    .proj-card:hover { border-color: var(--primary) !important; box-shadow: 0 8px 28px rgba(0,90,255,0.12); transform: translateY(-2px); }
+
+    .trow:hover { background: #f8fafc; }
+    .total-bar { background: var(--primary); color: white; border-radius: 0.75rem; padding: 1.5rem; position: sticky; top: 72px; }
+
+    .prose { font-family: 'Inter', sans-serif; line-height: 1.75; color: var(--fg); }
+    .prose p { margin-bottom: 1rem; }
+    .prose h2 { margin: 1.5rem 0 0.6rem; font-size: 1.25rem; color: var(--fg); }
+    .prose ul { padding-left: 1.4rem; margin-bottom: 1rem; }
+    .prose li { margin-bottom: 0.35rem; font-size: 0.93rem; color: var(--muted-fg); }
+    .prose li strong { color: var(--fg); }
+
+    /* ── USER CHIP ───────────────────────────────────────────────── */
+    .user-chip {
+      display: flex; align-items: center; gap: 0.55rem;
+      background: rgba(0,90,255,0.07); border: 1px solid rgba(0,90,255,0.15);
+      border-radius: 999px; padding: 0.3rem 0.8rem 0.3rem 0.4rem;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .user-chip:hover { background: rgba(0,90,255,0.12); }
+    .user-avatar {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--primary); color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; font-weight: 700; flex-shrink: 0;
+    }
+    .user-name { font-size: 0.8rem; font-weight: 600; color: var(--fg); max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* ── RESPONSIVE ──────────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .hide-mobile { display: none !important; }
+      .mob-col { flex-direction: column !important; }
+      .mob-grid-1 { grid-template-columns: 1fr !important; }
+      .mob-full { width: 100% !important; }
+      #calc-layout { grid-template-columns: 1fr !important; }
+      .auth-card { padding: 2rem 1.5rem; }
+    }
+
+    /* ══════════════════════════════════════════════════
+       PWA: SAFE AREA — Respeta el notch y barra de home en iOS
+    ══════════════════════════════════════════════════ */
+    :root {
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    body { overscroll-behavior: none; } /* Evita scroll de rebote en iOS PWA */
+
+    /* ══════════════════════════════════════════════════
+       PWA: BANNER DE INSTALACIÓN
+       Se muestra cuando el navegador dispara beforeinstallprompt.
+       DESKTOP: barra compacta en la parte superior.
+       MÓVIL: tarjeta flotante en la parte inferior.
+    ══════════════════════════════════════════════════ */
+    #pwa-install-banner {
+      display: none;
+      position: fixed;
+      z-index: 9990;
+      animation: bannerSlideIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    #pwa-install-banner.show { display: flex; }
+
+    /* ── Versión desktop del banner ── */
+    @media (min-width: 769px) {
+      #pwa-install-banner {
+        top: 0; left: 0; right: 0;
+        background: linear-gradient(90deg, #0f172a, #1e3a5f);
+        color: white; padding: 0.65rem 1.5rem;
+        align-items: center; justify-content: center; gap: 1rem;
+        font-size: 0.85rem;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.22);
+      }
+      #pwa-install-banner .mob-only { display: none; }
+      .banner-text { color: rgba(255,255,255,0.82); }
+      .banner-text strong { color: white; }
+      .banner-btn-install {
+        background: var(--primary); color: white; border: none;
+        border-radius: 0.4rem; padding: 0.4rem 1.1rem;
+        font-size: 0.82rem; font-weight: 700; cursor: pointer;
+        transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.4rem;
+      }
+      .banner-btn-install:hover { opacity: 0.88; transform: translateY(-1px); }
+      .banner-btn-close {
+        background: transparent; border: none; color: rgba(255,255,255,0.45);
+        font-size: 1rem; cursor: pointer; padding: 0.2rem 0.4rem; margin-left: 0.2rem;
+        transition: color 0.2s;
+      }
+      .banner-btn-close:hover { color: white; }
+      body.banner-visible { padding-top: 46px; }
+      body.banner-visible nav#web-navbar { top: 46px; }
+    }
+
+    /* ── Versión móvil del banner (tarjeta inferior) ── */
+    @media (max-width: 768px) {
+      #pwa-install-banner {
+        bottom: calc(var(--safe-bottom) + 1rem);
+        left: 1rem; right: 1rem;
+        background: white; border-radius: 1.1rem;
+        padding: 1.1rem 1.2rem; flex-direction: column; gap: 0.85rem;
+        box-shadow: 0 16px 48px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.06);
+      }
+      #pwa-install-banner .desk-only { display: none; }
+      .banner-header { display: flex; align-items: center; gap: 0.85rem; }
+      .banner-app-icon {
+        width: 52px; height: 52px; border-radius: 12px;
+        background: var(--primary); display: flex; align-items: center;
+        justify-content: center; flex-shrink: 0;
+        box-shadow: 0 4px 14px rgba(0,90,255,0.3);
+      }
+      .banner-title { font-family: 'Oswald',sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--fg); }
+      .banner-subtitle { font-size: 0.78rem; color: var(--muted-fg); margin-top: 0.15rem; line-height: 1.4; }
+      .banner-btn-close {
+        position: absolute; top: 0.85rem; right: 0.85rem;
+        background: var(--muted); border: none; border-radius: 50%;
+        width: 26px; height: 26px; font-size: 0.72rem;
+        cursor: pointer; color: var(--muted-fg);
+        display: flex; align-items: center; justify-content: center;
+      }
+      .banner-badges { display: flex; gap: 0.45rem; flex-wrap: wrap; }
+      .banner-badge {
+        display: flex; align-items: center; gap: 0.3rem;
+        font-size: 0.72rem; color: var(--muted-fg);
+        background: var(--muted); border-radius: 999px; padding: 0.2rem 0.6rem;
+      }
+      .banner-actions { display: flex; gap: 0.65rem; }
+      .banner-btn-install {
+        flex: 1; background: var(--primary); color: white; border: none;
+        border-radius: 0.6rem; padding: 0.7rem; font-size: 0.88rem; font-weight: 700;
+        cursor: pointer; transition: all 0.2s;
+        display: flex; align-items: center; justify-content: center; gap: 0.45rem;
+      }
+      .banner-btn-install:active { transform: scale(0.97); }
+      .banner-btn-later {
+        background: var(--muted); color: var(--muted-fg); border: none;
+        border-radius: 0.6rem; padding: 0.7rem 1rem;
+        font-size: 0.88rem; font-weight: 600; cursor: pointer;
+      }
+    }
+
+    @keyframes bannerSlideIn {
+      from { opacity: 0; transform: translateY(-16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ══════════════════════════════════════════════════
+       PWA: SPLASH SCREEN MÓVIL
+       Visible únicamente cuando la app se abre en modo
+       standalone (instalada desde el ícono del teléfono).
+       JS la muestra 1.8s y luego la oculta con fade.
+    ══════════════════════════════════════════════════ */
+    #mobile-splash {
+      display: none; /* JS lo activa solo en modo standalone */
+      position: fixed; inset: 0; z-index: 10000;
+      background: linear-gradient(150deg, #0f172a 0%, #1a3a6e 60%, #0f172a 100%);
+      flex-direction: column; align-items: center; justify-content: center;
+      padding-top: var(--safe-top); padding-bottom: var(--safe-bottom);
+    }
+    #mobile-splash::before {
+      content: ''; position: absolute; inset: 0;
+      background-image:
+        linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 32px 32px;
+    }
+    .splash-content {
+      position: relative; z-index: 1;
+      display: flex; flex-direction: column; align-items: center; gap: 1.4rem;
+      animation: splashIn 0.7s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    .splash-icon {
+      width: 88px; height: 88px; border-radius: 22px; background: var(--primary);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 12px 40px rgba(0,90,255,0.5), 0 0 0 1px rgba(255,255,255,0.1);
+    }
+    .splash-brand {
+      font-family: 'Oswald', sans-serif; font-size: 2.6rem; font-weight: 700;
+      color: white; text-transform: none; letter-spacing: -0.02em;
+    }
+    .splash-brand span { color: var(--primary); }
+    .splash-tagline { font-size: 0.88rem; color: rgba(255,255,255,0.5); text-align: center; max-width: 220px; line-height: 1.5; }
+    .splash-dots { display: flex; gap: 0.5rem; margin-top: 2.5rem; }
+    .splash-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      animation: dotPulse 1.4s ease-in-out infinite;
+    }
+    .splash-dot:nth-child(2) { animation-delay: 0.2s; }
+    .splash-dot:nth-child(3) { animation-delay: 0.4s; }
+    .splash-trust {
+      position: absolute; bottom: calc(var(--safe-bottom) + 1.5rem);
+      display: flex; align-items: center; gap: 1.5rem; opacity: 0.35;
+    }
+    .splash-trust-item {
+      display: flex; align-items: center; gap: 0.35rem;
+      font-size: 0.68rem; color: white; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    @keyframes splashIn {
+      from { opacity: 0; transform: scale(0.8) translateY(30px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    @keyframes dotPulse {
+      0%,100% { opacity: 0.25; transform: scale(0.8); }
+      50% { opacity: 1; transform: scale(1.2); background: var(--primary); }
+    }
+
+    /* ══════════════════════════════════════════════════
+       PWA: HEADER MÓVIL (MODO APP INSTALADA)
+       Reemplaza al navbar web cuando la app está instalada
+       y se usa en móvil. Incluye logo y botón de usuario.
+    ══════════════════════════════════════════════════ */
+    #mobile-app-header {
+      display: none; /* JS lo activa en modo standalone + móvil */
+      position: sticky; top: 0; z-index: 40;
+      background: rgba(255,255,255,0.96); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: calc(var(--safe-top) + 0.6rem) 1rem 0.6rem;
+      align-items: center; justify-content: space-between;
+      min-height: calc(var(--safe-top) + 56px);
+    }
+    .mhdr-logo { display: flex; align-items: center; gap: 0.5rem; }
+    .mhdr-icon {
+      background: var(--primary); color: white; border-radius: 7px;
+      width: 30px; height: 30px; display: flex; align-items: center;
+      justify-content: center; font-family: 'Oswald',sans-serif; font-size: 1rem; font-weight: 800;
+    }
+    .mhdr-name {
+      font-family: 'Oswald',sans-serif; font-size: 1.25rem;
+      font-weight: 700; color: var(--fg); text-transform: none;
+    }
+    .mhdr-name span { color: var(--primary); }
+    .mhdr-user-btn {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--primary); color: white; border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem; font-weight: 700; font-family: 'Oswald',sans-serif;
+    }
+
+    /* ══════════════════════════════════════════════════
+       PWA: BARRA DE NAVEGACIÓN INFERIOR MÓVIL
+       Visible solo cuando está instalada en móvil.
+       Permite navegar entre secciones con íconos estilo app nativa.
+    ══════════════════════════════════════════════════ */
+    #mobile-nav-bar {
+      display: none; /* JS lo activa en modo standalone + móvil */
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+      background: rgba(255,255,255,0.96); backdrop-filter: blur(16px);
+      border-top: 1px solid var(--border);
+      padding: 0.4rem 0 calc(var(--safe-bottom) + 0.4rem);
+    }
+    .mnav-item {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; gap: 0.2rem; padding: 0.35rem 0;
+      cursor: pointer; border: none; background: transparent;
+      color: var(--muted-fg); transition: color 0.2s;
+      font-family: 'Inter',sans-serif;
+    }
+    .mnav-item.active { color: var(--primary); }
+    .mnav-icon-wrap { border-radius: 12px; padding: 0.25rem 0.7rem; transition: background 0.2s; }
+    .mnav-item.active .mnav-icon-wrap { background: rgba(0,90,255,0.1); }
+    .mnav-label { font-size: 0.62rem; font-weight: 600; }
+
+    /* ══════════════════════════════════════════════════
+       PWA: AJUSTES GLOBALES EN MODO APP INSTALADA
+       Cuando body tiene clase .pwa-mobile:
+       - Se oculta el navbar web
+       - Se muestra el header móvil y la nav bar inferior
+       - Se agrega padding inferior a las páginas para no
+         quedar tapadas por la barra de navegación
+    ══════════════════════════════════════════════════ */
+    body.pwa-mobile .page { padding-bottom: calc(72px + var(--safe-bottom)); }
+    body.pwa-mobile nav#web-navbar { display: none !important; }
+    body.pwa-mobile #mobile-app-header { display: flex !important; }
+    body.pwa-mobile #mobile-nav-bar { display: flex !important; }
+
+    /* Toast ajuste en móvil: aparece arriba para no chocar con nav inferior */
+    @media (max-width: 768px) {
+      .toast { bottom: auto; top: calc(var(--safe-top) + 70px); right: 1rem; left: 1rem; min-width: unset; }
+    }
+
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════
+     PWA: SPLASH SCREEN (solo en modo standalone/instalado)
+     Aparece al abrir la app desde el ícono del teléfono.
+     JS detecta display-mode: standalone y la muestra.
+══════════════════════════════════════════════════ -->
+<div id="mobile-splash">
+  <div class="splash-content">
+    <div class="splash-icon">
+      <svg width="50" height="50" viewBox="0 0 50 50" fill="none">
+        <rect x="4" y="6" width="26" height="36" rx="3" stroke="white" stroke-width="2.5"/>
+        <line x1="9" y1="15" x2="24" y2="15" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        <line x1="9" y1="21" x2="24" y2="21" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        <line x1="9" y1="27" x2="18" y2="27" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="37" cy="34" r="9" stroke="rgba(255,255,255,0.35)" stroke-width="2"/>
+        <path d="M33 34l3 3 5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="splash-brand">Build<span>Smart</span></div>
+    <div class="splash-tagline">Estimación profesional de costos de construcción</div>
+    <div class="splash-dots">
+      <div class="splash-dot"></div>
+      <div class="splash-dot"></div>
+      <div class="splash-dot"></div>
+    </div>
+  </div>
+  <!-- Sellos de confianza al pie del splash -->
+  <div class="splash-trust">
+    <div class="splash-trust-item">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+      Seguro
+    </div>
+    <div class="splash-trust-item">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg>
+      En la nube
+    </div>
+    <div class="splash-trust-item">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      Offline
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     PWA: BANNER DE INSTALACIÓN
+     Evento beforeinstallprompt lo activa.
+     DESKTOP → barra superior; MÓVIL → tarjeta inferior.
+     El CSS ya diferencia los dos layouts automáticamente.
+══════════════════════════════════════════════════ -->
+<div id="pwa-install-banner">
+  <!-- Layout desktop (barra horizontal) -->
+  <span class="desk-only" style="font-size:1.1rem;">🏗️</span>
+  <span class="banner-text desk-only">
+    <strong>Instala BuildSmart</strong> — Acceso desde escritorio y funciona sin conexión
+  </span>
+  <button class="banner-btn-install desk-only" onclick="triggerPwaInstall()">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    Instalar App
+  </button>
+  <button class="banner-btn-close" onclick="dismissPwaBanner()" title="Cerrar">✕</button>
+
+  <!-- Layout móvil (tarjeta con detalle) -->
+  <div class="banner-header mob-only">
+    <div class="banner-app-icon">
+      <svg width="28" height="28" viewBox="0 0 50 50" fill="none">
+        <rect x="4" y="6" width="26" height="36" rx="3" stroke="white" stroke-width="2.5"/>
+        <line x1="9" y1="15" x2="24" y2="15" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        <line x1="9" y1="21" x2="24" y2="21" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="37" cy="34" r="9" stroke="rgba(255,255,255,0.35)" stroke-width="2"/>
+        <path d="M33 34l3 3 5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div>
+      <div class="banner-title">BuildSmart</div>
+      <div class="banner-subtitle">Instala para acceso rápido y modo offline</div>
+    </div>
+  </div>
+  <div class="banner-badges mob-only">
+    <div class="banner-badge">⚡ Acceso rápido</div>
+    <div class="banner-badge">📶 Funciona offline</div>
+    <div class="banner-badge">🔒 Sin publicidad</div>
+  </div>
+  <div class="banner-actions mob-only">
+    <button class="banner-btn-later" onclick="dismissPwaBanner()">Ahora no</button>
+    <button class="banner-btn-install" onclick="triggerPwaInstall()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Instalar Gratis
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     PWA: HEADER MÓVIL (solo en modo app instalada)
+     Reemplaza el navbar web con un header compacto
+     estilo app nativa con logo y botón de usuario.
+══════════════════════════════════════════════════ -->
+<div id="mobile-app-header">
+  <div class="mhdr-logo">
+    <div class="mhdr-icon">B</div>
+    <span class="mhdr-name">Build<span>Smart</span></span>
+  </div>
+  <div style="display:flex;align-items:center;gap:0.5rem;">
+    <button class="mhdr-user-btn" onclick="toggleUserMenu()" id="mobile-hdr-avatar">?</button>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════
+     APP LOADING (mientras Firebase inicializa)
+════════════════════════════════════════════════════ -->
+<div id="app-loading">
+  <div class="app-loading-inner">
+    <div class="app-loading-icon">B</div>
+    <p class="app-loading-text">Cargando BuildSmart…</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     AUTH SCREEN
+════════════════════════════════════════════════════ -->
+<div id="auth-screen" class="hidden">
+  <div class="auth-card">
+
+    <!-- Logo -->
+    <div class="auth-logo">
+      <div class="auth-logo-icon">B</div>
+      <span class="auth-logo-text">Build<span>Smart</span></span>
+    </div>
+
+    <!-- Tabs -->
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Iniciar Sesión</button>
+      <button class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Crear Cuenta</button>
+    </div>
+
+    <!-- Error / Success -->
+    <div class="auth-error" id="auth-error"></div>
+    <div class="auth-success" id="auth-success"></div>
+
+    <!-- ─── LOGIN FORM ────────────────────────── -->
+    <div id="form-login">
+      <div class="auth-input-group">
+        <label class="auth-label">Correo Electrónico</label>
+        <input type="email" id="login-email" class="auth-input" placeholder="tu@correo.com" autocomplete="email" />
+      </div>
+      <div class="auth-input-group">
+        <label class="auth-label">Contraseña</label>
+        <input type="password" id="login-password" class="auth-input" placeholder="••••••••" autocomplete="current-password"
+               onkeydown="if(event.key==='Enter') doLogin()" />
+      </div>
+      <div class="auth-forgot">
+        <a onclick="doForgotPassword()">¿Olvidaste tu contraseña?</a>
+      </div>
+      <button class="auth-btn-primary" id="btn-login" onclick="doLogin()">
+        Entrar a BuildSmart
+      </button>
+      <div class="auth-footer">
+        Plataforma profesional de estimación de costos
+      </div>
+    </div>
+
+    <!-- ─── REGISTER FORM ─────────────────────── -->
+    <div id="form-register" style="display:none;">
+      <div class="auth-input-group">
+        <label class="auth-label">Nombre Completo</label>
+        <input type="text" id="reg-name" class="auth-input" placeholder="Juan García" autocomplete="name" />
+      </div>
+      <div class="auth-input-group">
+        <label class="auth-label">Correo Electrónico</label>
+        <input type="email" id="reg-email" class="auth-input" placeholder="tu@correo.com" autocomplete="email" />
+      </div>
+      <div class="auth-input-group">
+        <label class="auth-label">Contraseña</label>
+        <input type="password" id="reg-password" class="auth-input" placeholder="Mínimo 6 caracteres" autocomplete="new-password" />
+      </div>
+      <div class="auth-input-group">
+        <label class="auth-label">Confirmar Contraseña</label>
+        <input type="password" id="reg-password2" class="auth-input" placeholder="Repite tu contraseña" autocomplete="new-password"
+               onkeydown="if(event.key==='Enter') doRegister()" />
+      </div>
+      <button class="auth-btn-primary" id="btn-register" onclick="doRegister()">
+        Crear Mi Cuenta
+      </button>
+      <div class="auth-footer" style="margin-top:1rem;">
+        Al registrarte, aceptas nuestros términos de uso
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     MAIN APP
+════════════════════════════════════════════════════ -->
+<div id="main-app" style="display:none;">
+
+<!-- ── NAVBAR ──────────────────────────────────── -->
+<nav id="web-navbar" style="background:rgba(255,255,255,0.93);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:40;height:60px;display:flex;align-items:center;">
+  <div style="max-width:1200px;margin:0 auto;width:100%;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;">
+    <div style="display:flex;align-items:center;gap:2.5rem;">
+      <span onclick="showPage('home')" style="font-family:'Oswald',sans-serif;font-size:1.35rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:0.45rem;text-transform:none;">
+        <span style="background:var(--primary);color:white;border-radius:6px;width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;font-size:0.9rem;font-weight:800;">B</span>
+        Build<span style="color:var(--primary);">Smart</span>
+      </span>
+      <div style="display:flex;gap:1.5rem;" class="hide-mobile">
+        <span id="nav-home" class="nav-link active" onclick="showPage('home')">Inicio</span>
+        <span id="nav-guides" class="nav-link" onclick="showPage('guides')">Guías de Construcción</span>
+        <span id="nav-dashboard" class="nav-link" onclick="showPage('dashboard')">Mis Proyectos</span>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:0.75rem;">
+      <button class="btn btn-primary hide-mobile" onclick="showPage('calculator')" style="padding:0.45rem 1.1rem;font-size:0.85rem;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="13" y2="14"/></svg>
+        Calculadora
+      </button>
+      <!-- User chip -->
+      <div class="user-chip" onclick="toggleUserMenu()" id="user-chip">
+        <div class="user-avatar" id="user-avatar-initial">?</div>
+        <span class="user-name hide-mobile" id="user-display-name">—</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--muted-fg)" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- User dropdown menu -->
+<div id="user-menu" style="display:none;position:fixed;top:68px;right:1.5rem;z-index:50;background:var(--card);border:1px solid var(--border);border-radius:0.75rem;box-shadow:0 12px 32px rgba(0,0,0,0.12);min-width:200px;padding:0.5rem;animation:fadeInUp 0.18s ease both;">
+  <div style="padding:0.6rem 0.85rem;border-bottom:1px solid var(--border);margin-bottom:0.35rem;">
+    <p style="font-weight:700;font-size:0.85rem;" id="menu-user-name">—</p>
+    <p style="color:var(--muted-fg);font-size:0.75rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="menu-user-email">—</p>
+  </div>
+  <button onclick="showPage('dashboard');toggleUserMenu()" style="width:100%;text-align:left;padding:0.5rem 0.85rem;border:none;background:transparent;border-radius:0.4rem;cursor:pointer;font-size:0.85rem;color:var(--fg);display:flex;align-items:center;gap:0.5rem;" onmouseover="this.style.background='var(--muted)'" onmouseout="this.style.background='transparent'">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+    Mis Proyectos
+  </button>
+  <button onclick="doLogout()" style="width:100%;text-align:left;padding:0.5rem 0.85rem;border:none;background:transparent;border-radius:0.4rem;cursor:pointer;font-size:0.85rem;color:#dc2626;display:flex;align-items:center;gap:0.5rem;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='transparent'">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    Cerrar Sesión
+  </button>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     PÁGINAS
+════════════════════════════════════════════════════ -->
+
+<!-- ── HOME ────────────────────────────────────── -->
+<div id="page-home" class="page active">
+  <!-- Hero -->
+  <section style="position:relative;overflow:hidden;padding:5rem 1.5rem 7rem;">
+    <div style="position:absolute;inset:0;background:radial-gradient(ellipse at top right,rgba(0,90,255,0.07),transparent 65%);pointer-events:none;"></div>
+    <div style="position:absolute;top:15%;left:3%;width:28rem;height:28rem;background:rgba(0,90,255,0.04);border-radius:50%;filter:blur(60px);pointer-events:none;"></div>
+    <div style="position:absolute;bottom:10%;right:3%;width:32rem;height:32rem;background:rgba(255,128,0,0.04);border-radius:50%;filter:blur(80px);pointer-events:none;"></div>
+    <div style="max-width:900px;margin:0 auto;text-align:center;position:relative;z-index:1;" class="anim">
+      <h1 style="font-size:clamp(2.5rem,7vw,5.5rem);font-weight:700;line-height:1.04;margin-bottom:1.5rem;color:var(--fg);">
+        Construye con <span style="color:var(--primary);">Precisión</span>,<br/>
+        Planea con <span style="color:var(--secondary);">Confianza</span>
+      </h1>
+      <p style="font-size:1.1rem;color:var(--muted-fg);max-width:620px;margin:0 auto 2.5rem;line-height:1.75;">
+        Estimación de costos de construcción profesional para todos. Desde remodelaciones DIY hasta proyectos de gran escala, BuildSmart te ayuda a calcular costos, gestionar materiales y aprender el oficio.
+      </p>
+      <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="showPage('calculator')" style="padding:0.85rem 2.2rem;font-size:1rem;box-shadow:0 8px 28px rgba(0,90,255,0.22);">
+          Empieza a Calcular Gratis
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+        <button class="btn btn-outline" onclick="showPage('guides')" style="padding:0.85rem 2.2rem;font-size:1rem;border-width:2px;">
+          Ver Guías de Construcción
+        </button>
+      </div>
+    </div>
+  </section>
+  <!-- Features -->
+  <section style="padding:4rem 1.5rem;background:var(--card);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+    <div style="max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;" class="mob-grid-1">
+      <div class="card" style="padding:2rem;border-color:rgba(0,90,255,0.18);background:rgba(0,90,255,0.025);">
+        <div style="background:rgba(0,90,255,0.12);padding:0.7rem;border-radius:0.5rem;width:fit-content;margin-bottom:1rem;">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="13" y2="14"/></svg>
+        </div>
+        <h3 style="font-size:1.15rem;margin-bottom:0.5rem;">Estimación Inteligente</h3>
+        <p style="color:var(--muted-fg);line-height:1.65;font-size:0.9rem;">Calcula costos de materiales al instante. Nuestro asistente de IA ayuda a traducir tus ideas en listas detalladas.</p>
+      </div>
+      <div class="card" style="padding:2rem;border-color:rgba(255,128,0,0.22);background:rgba(255,128,0,0.025);">
+        <div style="background:rgba(255,128,0,0.14);padding:0.7rem;border-radius:0.5rem;width:fit-content;margin-bottom:1rem;">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--secondary)" stroke-width="2"><path d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/></svg>
+        </div>
+        <h3 style="font-size:1.15rem;margin-bottom:0.5rem;">Gestión de Proyectos</h3>
+        <p style="color:var(--muted-fg);line-height:1.65;font-size:0.9rem;">Mantén todas tus remodelaciones en un solo lugar. Rastrea presupuestos, guarda cotizaciones y monitorea el progreso.</p>
+      </div>
+      <div class="card" style="padding:2rem;border-color:rgba(0,90,255,0.18);background:rgba(0,90,255,0.025);">
+        <div style="background:rgba(0,90,255,0.12);padding:0.7rem;border-radius:0.5rem;width:fit-content;margin-bottom:1rem;">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+        </div>
+        <h3 style="font-size:1.15rem;margin-bottom:0.5rem;">Conocimiento Experto</h3>
+        <p style="color:var(--muted-fg);line-height:1.65;font-size:0.9rem;">Accede a nuestra biblioteca de guías de construcción para entender las mejores prácticas y elección de materiales.</p>
+      </div>
+    </div>
+  </section>
+  <!-- Why BuildSmart -->
+  <section style="padding:5rem 1.5rem;background:linear-gradient(135deg,var(--bg),rgba(0,90,255,0.03) 50%,rgba(255,128,0,0.03));">
+    <div style="max-width:1100px;margin:0 auto;display:flex;flex-wrap:wrap;gap:4rem;align-items:center;">
+      <div style="flex:1;min-width:280px;">
+        <h2 style="font-size:clamp(1.7rem,4vw,2.7rem);line-height:1.1;margin-bottom:2rem;">Por qué los <span style="color:var(--primary);">Profesionales</span> eligen <span style="color:var(--secondary);">BuildSmart</span></h2>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div class="card" style="padding:0.9rem 1rem;display:flex;align-items:flex-start;gap:0.7rem;"><div style="background:rgba(255,128,0,0.1);border-radius:50%;padding:0.3rem;flex-shrink:0;margin-top:0.1rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--secondary)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div><span style="font-size:0.84rem;font-weight:500;line-height:1.45;">Bases de datos de materiales actualizadas semanalmente</span></div>
+          <div class="card" style="padding:0.9rem 1rem;display:flex;align-items:flex-start;gap:0.7rem;"><div style="background:rgba(255,128,0,0.1);border-radius:50%;padding:0.3rem;flex-shrink:0;margin-top:0.1rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--secondary)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div><span style="font-size:0.84rem;font-weight:500;line-height:1.45;">Optimización de cálculo de desperdicios con IA</span></div>
+          <div class="card" style="padding:0.9rem 1rem;display:flex;align-items:flex-start;gap:0.7rem;"><div style="background:rgba(255,128,0,0.1);border-radius:50%;padding:0.3rem;flex-shrink:0;margin-top:0.1rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--secondary)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div><span style="font-size:0.84rem;font-weight:500;line-height:1.45;">Exportación de estimaciones profesionales en PDF</span></div>
+          <div class="card" style="padding:0.9rem 1rem;display:flex;align-items:flex-start;gap:0.7rem;"><div style="background:rgba(255,128,0,0.1);border-radius:50%;padding:0.3rem;flex-shrink:0;margin-top:0.1rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--secondary)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div><span style="font-size:0.84rem;font-weight:500;line-height:1.45;">Sincronización en la nube en todos tus dispositivos</span></div>
+        </div>
+      </div>
+      <div style="flex:1;min-width:260px;">
+        <div style="position:relative;">
+          <div style="position:absolute;inset:-12px;background:linear-gradient(135deg,rgba(0,90,255,0.15),rgba(255,128,0,0.15));border-radius:1.5rem;filter:blur(24px);opacity:0.6;"></div>
+          <div style="position:relative;border-radius:1rem;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.14);border:3px solid white;">
+            <img src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=800&q=80" alt="Planos de Construcción" style="width:100%;display:block;aspect-ratio:16/9;object-fit:cover;" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- Stats -->
+  <section style="padding:3.5rem 1.5rem;background:var(--card);border-top:1px solid var(--border);">
+    <div style="max-width:900px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;text-align:center;" class="mob-grid-1">
+      <div><p style="font-family:'Oswald',sans-serif;font-size:3rem;font-weight:700;color:var(--primary);line-height:1;">12K+</p><p style="color:var(--muted-fg);font-size:0.9rem;">Proyectos Estimados</p></div>
+      <div><p style="font-family:'Oswald',sans-serif;font-size:3rem;font-weight:700;color:var(--secondary);line-height:1;">$2.4B</p><p style="color:var(--muted-fg);font-size:0.9rem;">En Costos Calculados</p></div>
+      <div><p style="font-family:'Oswald',sans-serif;font-size:3rem;font-weight:700;color:var(--primary);line-height:1;">98%</p><p style="color:var(--muted-fg);font-size:0.9rem;">Precisión de Estimaciones</p></div>
+    </div>
+  </section>
+</div>
+
+<!-- ── GUÍAS ─────────────────────────────────── -->
+<div id="page-guides" class="page">
+  <div style="position:relative;overflow:hidden;border-bottom:1px solid var(--border);padding:4rem 1.5rem 3rem;text-align:center;">
+    <div style="position:absolute;inset:0;background:radial-gradient(ellipse at top right,rgba(0,90,255,0.07),transparent 65%);pointer-events:none;"></div>
+    <div style="position:relative;z-index:1;" class="anim">
+      <h1 style="font-size:clamp(2rem,5vw,3.5rem);margin-bottom:1rem;">Guías de <span style="color:var(--primary);">Construcción</span></h1>
+      <p style="font-size:1rem;color:var(--muted-fg);max-width:560px;margin:0 auto;line-height:1.7;">Domina el oficio de la construcción. Desde fundamentos hasta técnicas avanzadas, nuestras guías expertas te dan la <strong style="color:var(--fg);">precisión</strong> que necesitas en cada proyecto.</p>
+    </div>
+  </div>
+  <div style="max-width:1200px;margin:0 auto;padding:2.5rem 1.5rem;">
+    <div style="display:flex;gap:0.55rem;flex-wrap:wrap;margin-bottom:2.5rem;" id="guide-filter-bar"></div>
+    <div id="guides-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.8rem;" class="mob-grid-1"></div>
+  </div>
+</div>
+
+<!-- ── GUÍA DETALLE ──────────────────────────── -->
+<div id="page-guide-detail" class="page">
+  <div style="max-width:820px;margin:0 auto;padding:2rem 1.5rem 4rem;">
+    <button class="btn btn-ghost" onclick="showPage('guides')" style="margin-bottom:1.5rem;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Volver a Guías
+    </button>
+    <div id="guide-detail-content"></div>
+  </div>
+</div>
+
+<!-- ── DASHBOARD ─────────────────────────────── -->
+<div id="page-dashboard" class="page">
+  <div style="max-width:1100px;margin:0 auto;padding:2.5rem 1.5rem;">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:2rem;">
+      <div>
+        <h1 style="font-size:1.9rem;">Mis Proyectos</h1>
+        <p style="color:var(--muted-fg);margin-top:0.3rem;font-size:0.9rem;">Administra tus estimaciones de construcción y remodelación</p>
+      </div>
+      <button class="btn btn-primary" onclick="openNewProjectModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        Nuevo Proyecto
+      </button>
+    </div>
+    <div id="projects-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;" class="mob-grid-1"></div>
+  </div>
+</div>
+
+<!-- ── PROYECTO DETALLE ──────────────────────── -->
+<div id="page-project" class="page">
+  <div style="max-width:1100px;margin:0 auto;padding:2.5rem 1.5rem;">
+    <div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.5rem;">
+      <button class="btn btn-ghost" onclick="showPage('dashboard')" style="padding:0.45rem 0.6rem;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      </button>
+      <h1 id="project-title" style="font-size:1.8rem;flex:1;"></h1>
+      <button class="btn btn-primary" onclick="openNewEstimateForCurrentProject()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        Nueva Estimación
+      </button>
+    </div>
+    <p id="project-meta" style="color:var(--muted-fg);font-size:0.85rem;margin-bottom:0.5rem;padding-left:3.3rem;"></p>
+    <p id="project-description" style="color:var(--muted-fg);font-size:0.9rem;margin-bottom:2rem;padding-left:3.3rem;"></p>
+    <div id="estimates-list"></div>
+  </div>
+</div>
+
+<!-- ── CALCULADORA ───────────────────────────── -->
+<div id="page-calculator" class="page">
+  <div style="max-width:1100px;margin:0 auto;padding:2.5rem 1.5rem;">
+    <h1 style="font-size:1.9rem;margin-bottom:1.8rem;">Nueva Estimación</h1>
+    <div id="calc-layout" style="display:grid;grid-template-columns:1fr 300px;gap:2rem;align-items:start;">
+      <!-- Left column -->
+      <div>
+        <div class="card" style="padding:1.5rem;margin-bottom:1.2rem;">
+          <div style="margin-bottom:1.3rem;">
+            <label class="label">Nombre de la Estimación</label>
+            <input type="text" id="calc-name" class="input" placeholder="Ej. Remodelación Baño Principal" />
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+            <h3 style="font-size:1rem;font-weight:700;">Conceptos</h3>
+            <button class="btn btn-outline" onclick="openAiModal()" style="padding:0.4rem 1rem;font-size:0.82rem;border-color:rgba(0,90,255,0.25)!important;color:var(--primary);">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              Asistente IA
+            </button>
+          </div>
+          <div style="border:1px solid var(--border);border-radius:0.5rem;overflow:hidden;margin-bottom:0.9rem;">
+            <table style="width:100%;border-collapse:collapse;font-size:0.85rem;">
+              <thead style="background:var(--muted);">
+                <tr>
+                  <th style="padding:0.65rem 0.8rem;text-align:left;font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;color:var(--muted-fg);width:38%;">Descripción</th>
+                  <th style="padding:0.65rem 0.5rem;text-align:left;font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;color:var(--muted-fg);width:12%;">Cant.</th>
+                  <th style="padding:0.65rem 0.5rem;text-align:left;font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;color:var(--muted-fg);width:13%;">Unidad</th>
+                  <th style="padding:0.65rem 0.5rem;text-align:left;font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;color:var(--muted-fg);width:16%;">Precio Unit.</th>
+                  <th style="padding:0.65rem 0.5rem;text-align:right;font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;color:var(--muted-fg);width:14%;">Total</th>
+                  <th style="width:7%;"></th>
+                </tr>
+              </thead>
+              <tbody id="calc-items-body"></tbody>
+            </table>
+          </div>
+          <button class="btn btn-outline" onclick="addCalcRow()" style="width:100%;justify-content:center;border-style:dashed;padding:0.65rem;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+            Agregar Concepto
+          </button>
+        </div>
+        <div id="ai-explanation-box" class="card" style="padding:1.3rem 1.4rem;display:none;border-left:4px solid var(--primary);">
+          <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.7rem;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <span style="font-weight:700;font-size:0.78rem;color:var(--primary);text-transform:uppercase;letter-spacing:0.07em;">Análisis del Asistente IA</span>
+          </div>
+          <p id="ai-explanation-text" style="color:var(--muted-fg);font-size:0.88rem;line-height:1.7;"></p>
+        </div>
+      </div>
+      <!-- Right sidebar -->
+      <div>
+        <div class="total-bar">
+          <p style="font-size:0.85rem;opacity:0.82;margin-bottom:0.25rem;">Costo Total Estimado</p>
+          <p id="calc-grand-total" style="font-family:'Oswald',sans-serif;font-size:2.7rem;font-weight:700;letter-spacing:-0.02em;line-height:1.1;">$0.00</p>
+          <div style="border-top:1px solid rgba(255,255,255,0.2);margin-top:1.4rem;padding-top:1.4rem;">
+            <div style="margin-bottom:1rem;">
+              <label style="font-size:0.78rem;opacity:0.78;display:block;margin-bottom:0.35rem;">Guardar en proyecto</label>
+              <select id="calc-project-select" style="width:100%;padding:0.5rem 0.7rem;border-radius:var(--radius);border:1px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.15);color:white;font-family:'Inter',sans-serif;font-size:0.85rem;cursor:pointer;">
+                <option value="" style="color:var(--fg);">— Seleccionar proyecto —</option>
+              </select>
+            </div>
+            <button class="btn btn-white" onclick="saveEstimate()" style="width:100%;justify-content:center;padding:0.75rem;font-size:0.9rem;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              Guardar Estimación
+            </button>
+          </div>
+        </div>
+        <div class="card" style="padding:1.1rem 1.2rem;margin-top:1rem;">
+          <p style="font-weight:700;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted-fg);margin-bottom:0.75rem;">Plantillas Rápidas</p>
+          <div style="display:flex;flex-direction:column;gap:0.3rem;">
+            <button class="btn btn-ghost" onclick="loadTemplate('bathroom')" style="justify-content:flex-start;font-size:0.83rem;padding:0.45rem 0.5rem;">🚿 Remodelación de Baño</button>
+            <button class="btn btn-ghost" onclick="loadTemplate('kitchen')" style="justify-content:flex-start;font-size:0.83rem;padding:0.45rem 0.5rem;">🍳 Cocina Completa</button>
+            <button class="btn btn-ghost" onclick="loadTemplate('deck')" style="justify-content:flex-start;font-size:0.83rem;padding:0.45rem 0.5rem;">🌿 Terraza Exterior</button>
+            <button class="btn btn-ghost" onclick="loadTemplate('painting')" style="justify-content:flex-start;font-size:0.83rem;padding:0.45rem 0.5rem;">🖌️ Pintura Interior</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     MODALS
+════════════════════════════════════════════════════ -->
+
+<!-- AI Modal -->
+<div id="ai-modal" class="modal-overlay" onclick="if(event.target===this)closeAiModal()">
+  <div class="modal">
+    <h2 style="font-size:1.2rem;margin-bottom:0.4rem;">Estimador de Costos con IA</h2>
+    <p style="color:var(--muted-fg);font-size:0.85rem;margin-bottom:1.1rem;">Describe tu proyecto y generaremos una lista de materiales y costos de mano de obra.</p>
+    <textarea id="ai-prompt" class="textarea" placeholder="Ejemplo: Quiero construir una terraza de madera de 3x4m con pino tratado, bases de concreto y barandales de aluminio." style="height:105px;margin-bottom:1.1rem;"></textarea>
+    <div style="display:flex;gap:0.7rem;">
+      <button class="btn btn-ghost" onclick="closeAiModal()" style="flex:1;justify-content:center;">Cancelar</button>
+      <button class="btn btn-primary" onclick="runAiGenerate()" id="ai-gen-btn" style="flex:2;justify-content:center;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        Generar Estimación
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- New Project Modal -->
+<div id="new-project-modal" class="modal-overlay" onclick="if(event.target===this)closeNewProjectModal()">
+  <div class="modal">
+    <h2 style="font-size:1.2rem;margin-bottom:1.2rem;">Crear Nuevo Proyecto</h2>
+    <div style="display:flex;flex-direction:column;gap:0.9rem;margin-bottom:1.2rem;">
+      <div><label class="label">Nombre del Proyecto *</label><input type="text" id="np-name" class="input" placeholder="Ej. Remodelación de Cocina" /></div>
+      <div><label class="label">Ubicación (Opcional)</label><input type="text" id="np-location" class="input" placeholder="Ej. Calle Principal 123" /></div>
+      <div><label class="label">Descripción</label><textarea id="np-desc" class="textarea" placeholder="Describe brevemente el alcance del trabajo..."></textarea></div>
+      <div><label class="label">Estado</label>
+        <select id="np-status" class="select-inp">
+          <option value="planning">En Planeación</option>
+          <option value="active">En Progreso</option>
+          <option value="completed">Completado</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;gap:0.7rem;">
+      <button class="btn btn-ghost" onclick="closeNewProjectModal()" style="flex:1;justify-content:center;">Cancelar</button>
+      <button class="btn btn-primary" onclick="createProject()" style="flex:2;justify-content:center;">Crear Proyecto</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+
+<!-- ══════════════════════════════════════════════════
+     PWA: BARRA DE NAVEGACIÓN INFERIOR (modo app instalada)
+     Solo visible en standalone + móvil.
+     Íconos de: Inicio, Calculadora, Proyectos, Guías.
+     La clase .active se gestiona desde showPage().
+══════════════════════════════════════════════════ -->
+<div id="mobile-nav-bar" style="display:flex;">
+  <button class="mnav-item active" id="mnav-home" onclick="showPage('home')">
+    <div class="mnav-icon-wrap">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/></svg>
+    </div>
+    <span class="mnav-label">Inicio</span>
+  </button>
+  <button class="mnav-item" id="mnav-calculator" onclick="showPage('calculator')">
+    <div class="mnav-icon-wrap">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="13" y2="14"/></svg>
+    </div>
+    <span class="mnav-label">Calcular</span>
+  </button>
+  <button class="mnav-item" id="mnav-dashboard" onclick="showPage('dashboard')">
+    <div class="mnav-icon-wrap">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+    </div>
+    <span class="mnav-label">Proyectos</span>
+  </button>
+  <button class="mnav-item" id="mnav-guides" onclick="showPage('guides')">
+    <div class="mnav-icon-wrap">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+    </div>
+    <span class="mnav-label">Guías</span>
+  </button>
+</div>
+
+</div><!-- /main-app -->
+
+<!-- ══════════════════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════════════════ -->
+<script>
+// ── STATE ────────────────────────────────────────────────────────────
+var projects = [];
+var estimates = [];
+var currentProjectId = null;
+var calcItems = [];
+var currentAiExplanation = null;
+
+// ── AUTH HELPERS ─────────────────────────────────────────────────────
+
+function switchAuthTab(tab) {
+  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+  document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+  document.getElementById('form-login').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('form-register').style.display = tab === 'register' ? 'block' : 'none';
+  clearAuthMessages();
+}
+
+function clearAuthMessages() {
+  var e = document.getElementById('auth-error');
+  var s = document.getElementById('auth-success');
+  e.classList.remove('show'); e.textContent = '';
+  s.classList.remove('show'); s.textContent = '';
+}
+
+function showAuthError(msg) {
+  var el = document.getElementById('auth-error');
+  el.textContent = msg; el.classList.add('show');
+  document.getElementById('auth-success').classList.remove('show');
+}
+
+function showAuthSuccess(msg) {
+  var el = document.getElementById('auth-success');
+  el.textContent = msg; el.classList.add('show');
+  document.getElementById('auth-error').classList.remove('show');
+}
+
+function setAuthLoading(btnId, loading) {
+  var btn = document.getElementById(btnId);
+  if (!btn) return;
+  btn.disabled = loading;
+  if (loading) {
+    btn._orig = btn.innerHTML;
+    btn.innerHTML = '<div class="spinner"></div>';
+  } else {
+    btn.innerHTML = btn._orig || btn.innerHTML;
+  }
+}
+
+// Traducir errores de Firebase al español
+function firebaseErrorMsg(code) {
+  var msgs = {
+    'auth/user-not-found': 'No existe una cuenta con ese correo.',
+    'auth/wrong-password': 'Contraseña incorrecta.',
+    'auth/invalid-credential': 'Correo o contraseña incorrectos.',
+    'auth/email-already-in-use': 'Ya existe una cuenta con ese correo.',
+    'auth/weak-password': 'La contraseña debe tener al menos 6 caracteres.',
+    'auth/invalid-email': 'El correo electrónico no es válido.',
+    'auth/too-many-requests': 'Demasiados intentos. Intenta más tarde.',
+    'auth/network-request-failed': 'Error de red. Verifica tu conexión.',
+  };
+  return msgs[code] || 'Ocurrió un error. Intenta de nuevo.';
+}
+
+// ── AUTH ACTIONS ─────────────────────────────────────────────────────
+
+function doLogin() {
+  clearAuthMessages();
+  var email = document.getElementById('login-email').value.trim();
+  var pass  = document.getElementById('login-password').value;
+  if (!email || !pass) { showAuthError('Por favor completa todos los campos.'); return; }
+  setAuthLoading('btn-login', true);
+  var fb = window._fb;
+  fb.signInWithEmailAndPassword(fb.auth, email, pass)
+    .catch(function(err) {
+      setAuthLoading('btn-login', false);
+      showAuthError(firebaseErrorMsg(err.code));
+    });
+}
+
+function doRegister() {
+  clearAuthMessages();
+  var name   = document.getElementById('reg-name').value.trim();
+  var email  = document.getElementById('reg-email').value.trim();
+  var pass   = document.getElementById('reg-password').value;
+  var pass2  = document.getElementById('reg-password2').value;
+  if (!name || !email || !pass || !pass2) { showAuthError('Por favor completa todos los campos.'); return; }
+  if (pass !== pass2) { showAuthError('Las contraseñas no coinciden.'); return; }
+  if (pass.length < 6) { showAuthError('La contraseña debe tener al menos 6 caracteres.'); return; }
+  setAuthLoading('btn-register', true);
+  var fb = window._fb;
+  fb.createUserWithEmailAndPassword(fb.auth, email, pass)
+    .then(function(cred) {
+      // Guardar nombre en Firebase Auth profile
+      return fb.updateProfile(cred.user, { displayName: name })
+        .then(function() {
+          // Guardar perfil en Realtime DB
+          return fb.set(fb.ref(fb.db, 'users/' + cred.user.uid), {
+            name: name,
+            email: email,
+            createdAt: new Date().toISOString()
+          });
+        });
+    })
+    .catch(function(err) {
+      setAuthLoading('btn-register', false);
+      showAuthError(firebaseErrorMsg(err.code));
+    });
+}
+
+function doForgotPassword() {
+  clearAuthMessages();
+  var email = document.getElementById('login-email').value.trim();
+  if (!email) { showAuthError('Ingresa tu correo en el campo de arriba.'); return; }
+  var fb = window._fb;
+  fb.sendPasswordResetEmail(fb.auth, email)
+    .then(function() {
+      showAuthSuccess('Te enviamos un correo para restablecer tu contraseña.');
+    })
+    .catch(function(err) {
+      showAuthError(firebaseErrorMsg(err.code));
+    });
+}
+
+function doLogout() {
+  toggleUserMenu(true);
+  var fb = window._fb;
+  fb.signOut(fb.auth);
+}
+
+// ── AUTH STATE CALLBACKS ─────────────────────────────────────────────
+
+window.onUserLoggedIn = function(user) {
+  // Ocultar loading y auth, mostrar app
+  setTimeout(function() {
+    document.getElementById('app-loading').classList.add('hidden');
+    document.getElementById('auth-screen').classList.add('hidden');
+    document.getElementById('main-app').style.display = 'block';
+  }, 300);
+
+  // Actualizar UI con nombre/email del usuario
+  var displayName = user.displayName || user.email.split('@')[0];
+  var initial = displayName.charAt(0).toUpperCase();
+  document.getElementById('user-avatar-initial').textContent = initial;
+  document.getElementById('user-display-name').textContent = displayName;
+  document.getElementById('menu-user-name').textContent = displayName;
+  document.getElementById('menu-user-email').textContent = user.email;
+
+  // Cargar datos del usuario desde Firebase
+  loadUserData(user.uid);
+};
+
+window.onUserLoggedOut = function() {
+  setTimeout(function() {
+    document.getElementById('app-loading').classList.add('hidden');
+    document.getElementById('main-app').style.display = 'none';
+    document.getElementById('auth-screen').classList.remove('hidden');
+    // Limpiar datos locales
+    projects = []; estimates = [];
+  }, 300);
+};
+
+// ── FIREBASE DATA ────────────────────────────────────────────────────
+
+function loadUserData(uid) {
+  var fb = window._fb;
+  // Cargar proyectos
+  fb.onValue(fb.ref(fb.db, 'users/' + uid + '/projects'), function(snap) {
+    var data = snap.val();
+    if (data) {
+      projects = Object.entries(data).map(function(e) {
+        return Object.assign({ _fbKey: e[0] }, e[1]);
+      });
+    } else {
+      projects = [];
+    }
+    renderDashboard();
+    updateCalcProjectSelect();
+  });
+  // Cargar estimaciones
+  fb.onValue(fb.ref(fb.db, 'users/' + uid + '/estimates'), function(snap) {
+    var data = snap.val();
+    if (data) {
+      estimates = Object.entries(data).map(function(e) {
+        return Object.assign({ _fbKey: e[0] }, e[1]);
+      });
+    } else {
+      estimates = [];
+    }
+    renderDashboard();
+    updateCalcProjectSelect();
+  });
+}
+
+function fbSaveProject(p) {
+  var uid = window.currentUser.uid;
+  var fb  = window._fb;
+  if (p._fbKey) {
+    // Update existing
+    fb.update(fb.ref(fb.db, 'users/' + uid + '/projects/' + p._fbKey), p);
+  } else {
+    // New — push
+    var newRef = fb.push(fb.ref(fb.db, 'users/' + uid + '/projects'));
+    p._fbKey = newRef.key;
+    fb.set(newRef, p);
+  }
+}
+
+function fbSaveEstimate(est) {
+  var uid = window.currentUser.uid;
+  var fb  = window._fb;
+  if (est._fbKey) {
+    fb.update(fb.ref(fb.db, 'users/' + uid + '/estimates/' + est._fbKey), est);
+  } else {
+    var newRef = fb.push(fb.ref(fb.db, 'users/' + uid + '/estimates'));
+    est._fbKey = newRef.key;
+    fb.set(newRef, est);
+  }
+}
+
+function fbDeleteEstimate(est) {
+  var uid = window.currentUser.uid;
+  var fb  = window._fb;
+  if (est._fbKey) {
+    fb.remove(fb.ref(fb.db, 'users/' + uid + '/estimates/' + est._fbKey));
+  }
+}
+
+// ── USER MENU ────────────────────────────────────────────────────────
+
+var userMenuOpen = false;
+function toggleUserMenu(forceClose) {
+  userMenuOpen = forceClose ? false : !userMenuOpen;
+  document.getElementById('user-menu').style.display = userMenuOpen ? 'block' : 'none';
+}
+document.addEventListener('click', function(e) {
+  if (!document.getElementById('user-chip').contains(e.target) &&
+      !document.getElementById('user-menu').contains(e.target)) {
+    userMenuOpen = false;
+    document.getElementById('user-menu').style.display = 'none';
+  }
+});
+
+// ── NAVIGATION ───────────────────────────────────────────────────────
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  var el = document.getElementById('page-' + id);
+  if (el) el.classList.add('active');
+  document.querySelectorAll('.nav-link').forEach(function(l){ l.classList.remove('active'); });
+  var nav = document.getElementById('nav-' + id);
+  if (nav) nav.classList.add('active');
+  window.scrollTo({top:0, behavior:'smooth'});
+  if (id === 'guides') initGuides();
+  if (id === 'dashboard') renderDashboard();
+  if (id === 'calculator') initCalculator();
+}
+
+// ── TOAST ────────────────────────────────────────────────────────────
+
+function showToast(msg, type) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (type ? ' ' + type : '');
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 3200);
+}
+
+// ── GUIDES DATA ──────────────────────────────────────────────────────
+
+var GUIDES = [
+  {id:1,cat:'basics',catLabel:'Fundamentos',title:'Fundamentos del Concreto',excerpt:'Aprende a preparar y verter mezclas de concreto con resistencia óptima para cimentaciones, pisos y estructuras de carga.',img:'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&q=80',content:'<h2>Introducción al Concreto</h2><p>El concreto es la piedra angular de la construcción moderna. Una mezcla correcta garantiza durabilidad, resistencia y ahorro a largo plazo.</p><h2>Proporciones de la Mezcla</h2><p>La mezcla estándar para cimentaciones residenciales es 1:2:4 (cemento:arena:grava). Para pisos se usa 1:2:3. La relación agua-cemento no debe exceder 0.5 para obtener buena resistencia.</p><ul><li><strong>Cemento:</strong> Actúa como aglutinante; usa cemento tipo I o II para usos generales</li><li><strong>Arena:</strong> Debe estar limpia, sin arcillas ni sales; tamaño máximo 4.75 mm</li><li><strong>Grava:</strong> Tamaño máximo de 19 mm para losas y 38 mm para masivos</li><li><strong>Agua:</strong> Potable, libre de aceites y ácidos; temperatura ideal 15-25°C</li></ul><h2>Proceso de Vaciado</h2><p>Prepara la cimbra antes de mezclar. Vierte el concreto en capas de 20-30 cm y compacta con vibrador para eliminar cangrejeras. El curado debe durar mínimo 7 días manteniéndolo húmedo.</p>'},
+  {id:2,cat:'plumbing',catLabel:'Plomería',title:'Instalación de Tubería PVC',excerpt:'Guía completa sobre dimensionamiento, corte, pegado y prueba de redes hidráulicas y sanitarias en PVC.',img:'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80',content:'<h2>Tipos de Tubería PVC</h2><p>Existen dos clasificaciones principales: hidráulica (presión) y sanitaria (drenaje). La hidráulica soporta presiones de trabajo de 6 a 16 kg/cm², mientras la sanitaria trabaja por gravedad.</p><h2>Proceso de Instalación</h2><p>Usa cortapipas para cortes limpios y lija el extremo para eliminar rebabas. Aplica primer y cemento solvente en ambas superficies, ensambla girando 1/4 de vuelta y mantén presión 30 segundos.</p>'},
+  {id:3,cat:'electrical',catLabel:'Eléctrico',title:'Instalaciones Eléctricas Residenciales',excerpt:'Entiende el diseño de circuitos, calibres de conductor, protecciones y normativa NOM para instalaciones seguras.',img:'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=600&q=80',content:'<h2>Conceptos Básicos</h2><p>La instalación eléctrica residencial se divide en circuitos de iluminación (calibre 12 AWG) y contactos (calibre 10 AWG). Cada circuito debe protegerse con un interruptor termomagnético del calibre adecuado.</p>'},
+  {id:4,cat:'advanced',catLabel:'Avanzado',title:'Estructuras de Acero y Concreto',excerpt:'Aprende sobre sistemas estructurales combinados, conexiones y consideraciones sísmicas para construcciones robustas.',img:'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&q=80',content:'<h2>Sistemas Estructurales</h2><p>La combinación de acero y concreto aprovecha la alta resistencia a tensión del acero y la resistencia a compresión del concreto. Los marcos rígidos de acero con losas de concreto son sistemas eficientes y económicos.</p>'},
+  {id:5,cat:'basics',catLabel:'Fundamentos',title:'Mampostería y Muros de Block',excerpt:'Domina las técnicas de construcción con block de concreto: mezclas, tendeles, plomeo y refuerzo vertical.',img:'https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=600&q=80',content:'<h2>Tipos de Block</h2><p>El block de concreto estándar mide 20x20x40 cm y soporta cargas de compresión. Para muros exteriores usa block macizo; para interiores el block hueco es suficiente y más económico.</p>'},
+  {id:6,cat:'advanced',catLabel:'Avanzado',title:'Impermeabilización de Azoteas',excerpt:'Técnicas profesionales de impermeabilización: sistemas bicapa, membranas y mantenimiento preventivo.',img:'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&q=80',content:'<h2>Sistemas de Impermeabilización</h2><p>El sistema bicapa con membranas asfálticas es el más durable (vida útil 10-15 años). Requiere superficie limpia, seca y con pendiente mínima del 2% para el drenaje de agua pluvial.</p>'}
+];
+
+// ── TEMPLATES DATA ───────────────────────────────────────────────────
+
+var TEMPLATES = {
+  bathroom:{name:'Remodelación de Baño',items:[{desc:'Azulejo de cerámica 30x30cm',qty:12,unit:'m²',price:280},{desc:'Mosaico de piso antiderrapante',qty:5,unit:'m²',price:320},{desc:'WC doble descarga',qty:1,unit:'pieza',price:2200},{desc:'Lavabo de muro con pedestal',qty:1,unit:'pieza',price:1400},{desc:'Regadera con set de accesorios',qty:1,unit:'juego',price:1800},{desc:'Cemento gris para pegado',qty:4,unit:'bolsa',price:145},{desc:'Fragua/junta',qty:2,unit:'kg',price:90},{desc:'Mano de obra plomería y acabados',qty:1,unit:'servicio',price:7500}],explanation:'Estimación para baño de 4-5 m² completo. Se incluye derribo de revestimientos anteriores en la mano de obra. El WC de doble descarga reduce el consumo de agua un 40%. Recuerda comprar un 10% extra de azulejo para reparaciones futuras.'},
+  kitchen:{name:'Cocina Completa',items:[{desc:'Muebles de cocina (base + aéreos)',qty:1,unit:'juego',price:18000},{desc:'Cubierta de granito 3cm',qty:3.5,unit:'ml',price:1200},{desc:'Fregadero acero inox doble tarja',qty:1,unit:'pieza',price:2800},{desc:'Mezcladora para fregadero',qty:1,unit:'pieza',price:1200},{desc:'Azulejo para salpicadero',qty:4,unit:'m²',price:380},{desc:'Instalación eléctrica (circuito dedicado)',qty:1,unit:'servicio',price:2500},{desc:'Mano de obra instalación de muebles',qty:1,unit:'servicio',price:5500}],explanation:'Estimación para cocina de 8-10 m². Los muebles incluyen herrajes soft-close. El granito requiere sellador anual. El circuito eléctrico dedicado es obligatorio para hornos y refrigeradores de alta demanda.'},
+  deck:{name:'Terraza Exterior',items:[{desc:'Madera de pino tratado 2x6"',qty:45,unit:'ml',price:95},{desc:'Postes de madera 4x4" para bases',qty:6,unit:'pieza',price:380},{desc:'Tornillería para exterior galvanizada',qty:2,unit:'caja',price:240},{desc:'Sellador/barniz para madera exterior',qty:4,unit:'litro',price:180},{desc:'Barandal aluminio anodizado',qty:8,unit:'ml',price:420},{desc:'Concreto para bases (bolsas)',qty:12,unit:'bolsa',price:95},{desc:'Mano de obra carpintería',qty:1,unit:'servicio',price:5800}],explanation:'Estimación para terraza de madera de aproximadamente 12 m² (3x4m) con pino tratado clase 4 para exterior. Se recomienda aplicar sellador UV cada 2 años.'},
+  painting:{name:'Pintura Interior',items:[{desc:'Pintura vinílica interior mate blanca',qty:20,unit:'litro',price:85},{desc:'Sellador/fijador de paredes',qty:8,unit:'litro',price:65},{desc:'Masilla para pared (reparación)',qty:4,unit:'kg',price:55},{desc:'Cinta de enmascarar 2"',qty:6,unit:'rollo',price:35},{desc:'Rodillos y brochas (juego)',qty:2,unit:'juego',price:180},{desc:'Mano de obra pintura (100 m²)',qty:1,unit:'servicio',price:3200}],explanation:'Estimación para pintura interior de casa de 3 habitaciones (~100 m² de muros). Se consideran dos manos de pintura sobre sellador.'}
+};
+
+// ── AI RESPONSES ─────────────────────────────────────────────────────
+
+var AI_RESPONSES = [
+  {items:[{desc:'Block de concreto 15x20x40cm',qty:180,unit:'pieza',price:18},{desc:'Cemento gris Portland 50kg',qty:15,unit:'bolsa',price:185},{desc:'Arena de construcción',qty:1.5,unit:'m³',price:620},{desc:'Varilla corrugada #3 (3/8")',qty:30,unit:'pieza',price:95},{desc:'Impermeabilizante elastomérico',qty:10,unit:'litro',price:90},{desc:'Mano de obra albañilería',qty:1,unit:'semana',price:4500}],explanation:'Basado en tu descripción, incluí los materiales esenciales para construcción de muros con block de concreto. Te recomiendo agregar un 10% adicional de materiales por mermas y cortes.'},
+  {items:[{desc:'Loseta cerámica 60x60cm primera calidad',qty:35,unit:'m²',price:320},{desc:'Adhesivo para piso (bolsa 25kg)',qty:8,unit:'bolsa',price:145},{desc:'Nivelador de piso autonivelante',qty:3,unit:'bolsa',price:280},{desc:'Crucetas 3mm para junteado',qty:500,unit:'pieza',price:0.80},{desc:'Fragua/junta epóxica',qty:4,unit:'kg',price:165},{desc:'Mano de obra instalación pisos',qty:35,unit:'m²',price:85}],explanation:'Para pisos en área interior de aproximadamente 35 m². El nivelador es fundamental si el piso base tiene desniveles mayores a 3mm.'},
+  {items:[{desc:'Lamina de zinc cal. 26 (1.2m x 2.4m)',qty:18,unit:'pieza',price:380},{desc:'Viga de madera de pino 2x4"',qty:24,unit:'pieza',price:120},{desc:'Tornillo autoperforante 2.5"',qty:3,unit:'caja',price:75},{desc:'Canalón de PVC 3m',qty:6,unit:'pieza',price:145},{desc:'Silicón transparente para techos',qty:4,unit:'cartucho',price:55},{desc:'Mano de obra instalación techo',qty:1,unit:'servicio',price:5200}],explanation:'Estimación para cubierta de lámina de zinc en área de aproximadamente 40 m² con pendiente del 15%.'}
+];
+
+// ── GUIDES ───────────────────────────────────────────────────────────
+
+var currentGuideFilter = 'all';
+
+function initGuides() { renderFilterBar(); renderGuides(currentGuideFilter); }
+
+function renderFilterBar() {
+  var bar = document.getElementById('guide-filter-bar');
+  var cats = [{val:'all',label:'Todos'},{val:'basics',label:'Fundamentos'},{val:'advanced',label:'Avanzado'},{val:'electrical',label:'Eléctrico'},{val:'plumbing',label:'Plomería'}];
+  bar.innerHTML = cats.map(function(c){
+    var isActive = c.val === currentGuideFilter;
+    return '<button onclick="filterGuides(\''+c.val+'\')" style="padding:0.38rem 1rem;border-radius:999px;border:1.5px solid '+(isActive?'var(--primary)':'var(--border)')+';background:'+(isActive?'var(--primary)':'transparent')+';color:'+(isActive?'white':'var(--fg)')+';font-size:0.8rem;font-weight:600;cursor:pointer;transition:all 0.2s;">'+c.label+'</button>';
+  }).join('');
+}
+
+function filterGuides(cat) { currentGuideFilter = cat; renderFilterBar(); renderGuides(cat); }
+
+function renderGuides(cat) {
+  var filtered = cat === 'all' ? GUIDES : GUIDES.filter(function(g){ return g.cat === cat; });
+  var grid = document.getElementById('guides-grid');
+  grid.innerHTML = filtered.map(function(g,i){
+    var accent = i%2===0 ? 'var(--primary)' : 'var(--secondary)';
+    return '<div class="card guide-card" onclick="showGuide('+g.id+')" style="overflow:hidden;animation:fadeInUp 0.4s ease-out '+(i*0.07)+'s both;">'
+      +'<div style="height:13rem;overflow:hidden;position:relative;background:var(--muted);">'
+      +'<img src="'+g.img+'" class="guide-img" alt="'+g.title+'" onerror="this.src=\'https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=600&q=80\'" />'
+      +'<span style="position:absolute;top:0.75rem;left:0.75rem;background:'+accent+';color:white;padding:0.2rem 0.6rem;border-radius:999px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">'+g.catLabel+'</span>'
+      +'</div><div style="padding:1.2rem 1.4rem 1.5rem;">'
+      +'<h3 style="font-size:1.2rem;margin-bottom:0.5rem;color:var(--fg);">'+g.title+'</h3>'
+      +'<p style="color:var(--muted-fg);font-size:0.85rem;line-height:1.65;margin-bottom:1rem;">'+g.excerpt+'</p>'
+      +'<div style="display:flex;align-items:center;gap:0.35rem;font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:'+accent+';">Leer Guía <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>'
+      +'</div></div>';
+  }).join('');
+}
+
+function showGuide(id) {
+  var g = GUIDES.find(function(x){ return x.id === id; });
+  if (!g) return;
+  document.getElementById('guide-detail-content').innerHTML =
+    '<div style="position:relative;border-radius:0.75rem;overflow:hidden;margin-bottom:2rem;height:18rem;">'
+    +'<img src="'+g.img+'" alt="'+g.title+'" style="width:100%;height:100%;object-fit:cover;" />'
+    +'<div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.65),transparent);"></div>'
+    +'<div style="position:absolute;bottom:1.5rem;left:1.5rem;">'
+    +'<span style="background:var(--primary);color:white;padding:0.22rem 0.7rem;border-radius:999px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;display:inline-block;margin-bottom:0.55rem;">'+g.catLabel+'</span>'
+    +'<h1 style="font-size:clamp(1.5rem,4vw,2.3rem);color:white;text-shadow:0 2px 8px rgba(0,0,0,0.4);">'+g.title+'</h1>'
+    +'</div></div>'
+    +'<div class="card" style="padding:2rem;"><div class="prose">'+g.content+'</div>'
+    +'<hr style="border:none;border-top:1px solid var(--border);margin:1.5rem 0;" />'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">'
+    +'<button class="btn btn-primary" onclick="showPage(\'calculator\')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/></svg> Calcular Estimación</button>'
+    +'<button class="btn btn-ghost" onclick="showPage(\'guides\')">Ver más guías</button>'
+    +'</div></div>';
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  document.getElementById('page-guide-detail').classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── DASHBOARD ────────────────────────────────────────────────────────
+
+function renderDashboard() {
+  updateCalcProjectSelect();
+  var grid = document.getElementById('projects-grid');
+  if (!grid) return;
+  if (!projects.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:5rem 2rem;border:2px dashed var(--border);border-radius:1rem;background:var(--card);">'
+      +'<svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="var(--muted-fg)" stroke-width="1" style="margin:0 auto 1rem;display:block;opacity:0.35;"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>'
+      +'<h3 style="font-size:1.1rem;margin-bottom:0.5rem;">No hay proyectos aún</h3>'
+      +'<p style="color:var(--muted-fg);font-size:0.88rem;margin-bottom:1.2rem;">Crea tu primer proyecto para comenzar a estimar costos.</p>'
+      +'<button class="btn btn-primary" onclick="openNewProjectModal()">Crear Proyecto</button></div>';
+    return;
+  }
+  grid.innerHTML = projects.map(function(p){
+    var pEsts = estimates.filter(function(e){ return e.projectId === p.id; });
+    var total = pEsts.reduce(function(s,e){ return s+(e.total||0); },0);
+    var badgeClass = p.status==='completed'?'badge-green':p.status==='active'?'badge-orange':'badge-blue';
+    var badgeLabel = p.status==='completed'?'Completado':p.status==='active'?'En Progreso':'En Planeación';
+    var created = new Date(p.createdAt).toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'});
+    return '<div class="card proj-card" onclick="openProject('+p.id+')" style="padding:1.4rem;display:flex;flex-direction:column;">'
+      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.85rem;">'
+      +'<div style="background:rgba(0,90,255,0.1);padding:0.5rem;border-radius:0.5rem;">'
+      +'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>'
+      +'</div><span class="badge '+badgeClass+'">'+badgeLabel+'</span></div>'
+      +'<h3 style="font-size:1.05rem;margin-bottom:0.3rem;">'+escHtml(p.name)+'</h3>'
+      +(p.location?'<p style="color:var(--muted-fg);font-size:0.8rem;margin-bottom:0.4rem;">📍 '+escHtml(p.location)+'</p>':'')
+      +'<p style="color:var(--muted-fg);font-size:0.83rem;line-height:1.55;margin-bottom:auto;padding-bottom:0.9rem;">'+escHtml(p.description||'Sin descripción.')+'</p>'
+      +'<div style="border-top:1px solid var(--border);padding-top:0.75rem;display:flex;justify-content:space-between;align-items:center;">'
+      +'<div><p style="font-size:0.7rem;color:var(--muted-fg);text-transform:uppercase;letter-spacing:0.04em;">'+pEsts.length+' estimación'+(pEsts.length!==1?'es':'')+'</p>'
+      +(total>0?'<p style="font-weight:700;font-size:0.92rem;color:var(--primary);font-family:\'Oswald\',sans-serif;">$'+total.toLocaleString('es-MX',{minimumFractionDigits:2})+'</p>':'')
+      +'</div><span style="font-size:0.76rem;color:var(--muted-fg);">'+created+'</span></div></div>';
+  }).join('');
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── PROJECT DETAIL ───────────────────────────────────────────────────
+
+function openProject(id) {
+  currentProjectId = id;
+  var p = projects.find(function(x){ return x.id === id; });
+  if (!p) return;
+  document.getElementById('project-title').textContent = p.name;
+  document.getElementById('project-meta').textContent = (p.location?'📍 '+p.location+'   ':'')+'📅 Creado '+new Date(p.createdAt).toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('project-description').textContent = p.description||'';
+  renderEstimatesList(id);
+  showPage('project');
+}
+
+function openNewEstimateForCurrentProject() {
+  initCalculator();
+  setTimeout(function(){
+    var sel = document.getElementById('calc-project-select');
+    if (sel && currentProjectId) sel.value = currentProjectId;
+  },80);
+  showPage('calculator');
+}
+
+function renderEstimatesList(projectId) {
+  var pEsts = estimates.filter(function(e){ return e.projectId===projectId; });
+  var list = document.getElementById('estimates-list');
+  if (!pEsts.length) {
+    list.innerHTML='<div style="text-align:center;padding:4rem 2rem;border:2px dashed var(--border);border-radius:1rem;background:var(--card);">'
+      +'<svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="var(--muted-fg)" stroke-width="1.2" style="margin:0 auto 1rem;display:block;opacity:0.35;"><rect x="4" y="2" width="16" height="20" rx="2"/></svg>'
+      +'<h3 style="font-size:1rem;margin-bottom:0.4rem;">Sin estimaciones</h3>'
+      +'<p style="color:var(--muted-fg);font-size:0.86rem;margin-bottom:1rem;">Crea la primera estimación para este proyecto.</p>'
+      +'<button class="btn btn-primary" onclick="openNewEstimateForCurrentProject()">Nueva Estimación</button></div>';
+    return;
+  }
+  list.innerHTML='<div style="display:flex;flex-direction:column;gap:1rem;">'
+    +pEsts.map(function(est){
+      var created=new Date(est.createdAt).toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'});
+      return '<div class="card" style="overflow:hidden;">'
+        +'<div style="padding:1.2rem 1.4rem;display:flex;justify-content:space-between;align-items:center;cursor:pointer;gap:1rem;" onclick="toggleEstDetail(\'ed-'+est.id+'\')">'
+        +'<div><h3 style="font-size:1rem;font-weight:600;">'+escHtml(est.name)+'</h3><p style="color:var(--muted-fg);font-size:0.78rem;margin-top:0.1rem;">'+created+'</p></div>'
+        +'<div style="display:flex;align-items:center;gap:0.9rem;">'
+        +'<div style="text-align:right;"><p style="font-family:\'Oswald\',sans-serif;font-size:1.45rem;font-weight:700;color:var(--primary);">$'+est.total.toLocaleString('es-MX',{minimumFractionDigits:2})+'</p><p style="font-size:0.72rem;color:var(--muted-fg);">'+est.items.length+' concepto'+(est.items.length!==1?'s':'')+'</p></div>'
+        +'<button class="btn-danger-sm" onclick="event.stopPropagation();deleteEstimate('+est.id+')" title="Eliminar"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button>'
+        +'</div></div>'
+        +'<div id="ed-'+est.id+'" style="display:none;border-top:1px solid var(--border);">'
+        +(est.explanation?'<div style="padding:0.9rem 1.4rem;background:rgba(0,90,255,0.025);border-bottom:1px solid var(--border);"><p style="font-size:0.83rem;color:var(--muted-fg);line-height:1.65;">'+escHtml(est.explanation)+'</p></div>':'')
+        +'<table style="width:100%;border-collapse:collapse;font-size:0.82rem;">'
+        +'<thead style="background:var(--muted);"><tr><th style="padding:0.55rem 1rem;text-align:left;font-size:0.72rem;font-weight:600;text-transform:uppercase;color:var(--muted-fg);">Descripción</th><th style="padding:0.55rem 0.7rem;text-align:right;font-size:0.72rem;font-weight:600;text-transform:uppercase;color:var(--muted-fg);">Cant.</th><th style="padding:0.55rem 0.7rem;text-align:left;font-size:0.72rem;font-weight:600;text-transform:uppercase;color:var(--muted-fg);">Unidad</th><th style="padding:0.55rem 0.7rem;text-align:right;font-size:0.72rem;font-weight:600;text-transform:uppercase;color:var(--muted-fg);">Precio</th><th style="padding:0.55rem 1rem;text-align:right;font-size:0.72rem;font-weight:600;text-transform:uppercase;color:var(--muted-fg);">Total</th></tr></thead>'
+        +'<tbody>'+est.items.map(function(item){return '<tr class="trow"><td style="padding:0.55rem 1rem;font-weight:500;">'+escHtml(item.desc)+'</td><td style="padding:0.55rem 0.7rem;text-align:right;color:var(--muted-fg);">'+item.qty+'</td><td style="padding:0.55rem 0.7rem;color:var(--muted-fg);">'+escHtml(item.unit)+'</td><td style="padding:0.55rem 0.7rem;text-align:right;font-family:monospace;color:var(--muted-fg);">$'+item.price.toLocaleString('es-MX',{minimumFractionDigits:2})+'</td><td style="padding:0.55rem 1rem;text-align:right;font-family:monospace;font-weight:600;">$'+(item.qty*item.price).toLocaleString('es-MX',{minimumFractionDigits:2})+'</td></tr>';}).join('')+'</tbody>'
+        +'<tfoot><tr style="border-top:2px solid var(--border);background:rgba(0,90,255,0.025);"><td colspan="4" style="padding:0.7rem 1rem;font-weight:700;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.04em;">Total Estimado</td><td style="padding:0.7rem 1rem;text-align:right;font-family:\'Oswald\',sans-serif;font-size:1.2rem;font-weight:700;color:var(--primary);">$'+est.total.toLocaleString('es-MX',{minimumFractionDigits:2})+'</td></tr></tfoot>'
+        +'</table></div></div>';
+    }).join('')+'</div>';
+}
+
+function toggleEstDetail(id) {
+  var el=document.getElementById(id);
+  if(el) el.style.display=el.style.display==='none'?'block':'none';
+}
+
+function deleteEstimate(id) {
+  if (!confirm('¿Eliminar esta estimación?')) return;
+  var est = estimates.find(function(e){ return e.id === id; });
+  if (est) fbDeleteEstimate(est);
+  estimates = estimates.filter(function(e){ return e.id!==id; });
+  renderEstimatesList(currentProjectId);
+  renderDashboard();
+  showToast('Estimación eliminada.');
+}
+
+// ── NEW PROJECT MODAL ────────────────────────────────────────────────
+
+function openNewProjectModal() {
+  document.getElementById('new-project-modal').classList.add('open');
+  setTimeout(function(){ document.getElementById('np-name').focus(); },100);
+}
+function closeNewProjectModal() {
+  document.getElementById('new-project-modal').classList.remove('open');
+  ['np-name','np-location','np-desc'].forEach(function(id){ document.getElementById(id).value=''; });
+  document.getElementById('np-status').value='planning';
+}
+function createProject() {
+  var name=(document.getElementById('np-name').value||'').trim();
+  if(!name){ document.getElementById('np-name').focus(); showToast('Por favor ingresa el nombre del proyecto.'); return; }
+  var p = {
+    id: nextId(projects),
+    name: name,
+    location: (document.getElementById('np-location').value||'').trim()||null,
+    description: (document.getElementById('np-desc').value||'').trim()||null,
+    status: document.getElementById('np-status').value,
+    createdAt: new Date().toISOString()
+  };
+  fbSaveProject(p);
+  projects.push(p);
+  closeNewProjectModal();
+  renderDashboard();
+  showToast('Proyecto "'+p.name+'" creado.', 'success');
+}
+
+function nextId(arr) { return arr.length ? Math.max.apply(null,arr.map(function(x){ return x.id||0; }))+1 : 1; }
+
+// ── CALCULATOR ───────────────────────────────────────────────────────
+
+function initCalculator() {
+  calcItems=[{desc:'',qty:1,unit:'unidad',price:0}];
+  currentAiExplanation=null;
+  document.getElementById('calc-name').value='';
+  document.getElementById('ai-explanation-box').style.display='none';
+  renderCalcItems();
+  updateCalcProjectSelect();
+}
+
+function updateCalcProjectSelect() {
+  var sel=document.getElementById('calc-project-select');
+  if(!sel) return;
+  var currentVal=sel.value;
+  sel.innerHTML='<option value="" style="color:var(--fg);">— Seleccionar proyecto —</option>'
+    +projects.map(function(p){ return '<option value="'+p.id+'" style="color:var(--fg);">'+escHtml(p.name)+'</option>'; }).join('');
+  if(currentVal) sel.value=currentVal;
+}
+
+function renderCalcItems() {
+  var tbody=document.getElementById('calc-items-body');
+  tbody.innerHTML=calcItems.map(function(item,i){
+    var rowTotal=(item.qty*item.price).toFixed(2);
+    return '<tr class="trow" style="border-bottom:1px solid var(--border);">'
+      +'<td style="padding:0.3rem 0.5rem;"><input type="text" class="input" style="border:none;background:transparent;padding:0.3rem 0;box-shadow:none;" placeholder="Nombre del concepto" value="'+escHtml(item.desc)+'" oninput="updateItem('+i+',\'desc\',this.value)" /></td>'
+      +'<td style="padding:0.3rem 0.3rem;"><input type="number" class="input" style="border:none;background:transparent;padding:0.3rem 0;box-shadow:none;width:70px;" min="0" step="any" value="'+item.qty+'" oninput="updateItem('+i+',\'qty\',this.value)" /></td>'
+      +'<td style="padding:0.3rem 0.3rem;"><input type="text" class="input" style="border:none;background:transparent;padding:0.3rem 0;box-shadow:none;width:70px;" value="'+escHtml(item.unit)+'" oninput="updateItem('+i+',\'unit\',this.value)" /></td>'
+      +'<td style="padding:0.3rem 0.3rem;"><input type="number" class="input" style="border:none;background:transparent;padding:0.3rem 0;box-shadow:none;width:80px;" min="0" step="any" value="'+item.price+'" oninput="updateItem('+i+',\'price\',this.value)" /></td>'
+      +'<td style="padding:0.3rem 0.5rem;text-align:right;font-family:monospace;font-weight:600;white-space:nowrap;">$'+parseFloat(rowTotal).toLocaleString('es-MX',{minimumFractionDigits:2})+'</td>'
+      +'<td style="padding:0.3rem 0.4rem;text-align:center;"><button class="btn-danger-sm" onclick="removeCalcRow('+i+')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button></td>'
+      +'</tr>';
+  }).join('');
+  updateGrandTotal();
+}
+
+function updateItem(i,field,val) {
+  if(field==='qty'||field==='price') calcItems[i][field]=parseFloat(val)||0;
+  else calcItems[i][field]=val;
+  updateGrandTotal();
+  var rows=document.querySelectorAll('#calc-items-body tr');
+  if(rows[i]){ var tc=rows[i].querySelectorAll('td')[4]; if(tc){ var rt=(calcItems[i].qty*calcItems[i].price); tc.textContent='$'+rt.toLocaleString('es-MX',{minimumFractionDigits:2}); } }
+}
+
+function updateGrandTotal() {
+  var total=calcItems.reduce(function(s,item){ return s+(item.qty*item.price); },0);
+  document.getElementById('calc-grand-total').textContent='$'+total.toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+function addCalcRow() { calcItems.push({desc:'',qty:1,unit:'unidad',price:0}); renderCalcItems(); }
+
+function removeCalcRow(i) {
+  if(calcItems.length<=1){ calcItems[0]={desc:'',qty:1,unit:'unidad',price:0}; renderCalcItems(); return; }
+  calcItems.splice(i,1); renderCalcItems();
+}
+
+function saveEstimate() {
+  var name=(document.getElementById('calc-name').value||'').trim();
+  if(!name){ document.getElementById('calc-name').focus(); showToast('Por favor ingresa el nombre de la estimación.'); return; }
+  var projectId=parseInt(document.getElementById('calc-project-select').value);
+  if(!projectId){ showToast('Selecciona un proyecto para guardar.'); return; }
+  var total=calcItems.reduce(function(s,item){ return s+(item.qty*item.price); },0);
+  var est={
+    id: nextId(estimates),
+    projectId: projectId,
+    name: name,
+    items: calcItems.map(function(i){ return {desc:i.desc,qty:i.qty,unit:i.unit,price:i.price}; }),
+    total: total,
+    explanation: currentAiExplanation,
+    createdAt: new Date().toISOString()
+  };
+  fbSaveEstimate(est);
+  estimates.push(est);
+  showToast('Estimación guardada en Firebase.', 'success');
+  currentProjectId=projectId;
+  openProject(projectId);
+}
+
+function loadTemplate(key) {
+  var t=TEMPLATES[key]; if(!t) return;
+  document.getElementById('calc-name').value=t.name;
+  calcItems=t.items.map(function(i){ return {desc:i.desc,qty:i.qty,unit:i.unit,price:i.price}; });
+  currentAiExplanation=t.explanation;
+  var box=document.getElementById('ai-explanation-box');
+  box.style.display='block';
+  document.getElementById('ai-explanation-text').textContent=t.explanation;
+  renderCalcItems();
+  showToast('Plantilla "'+t.name+'" cargada.');
+}
+
+// ── AI MODAL ─────────────────────────────────────────────────────────
+
+function openAiModal(){ document.getElementById('ai-modal').classList.add('open'); setTimeout(function(){ document.getElementById('ai-prompt').focus(); },100); }
+function closeAiModal(){ document.getElementById('ai-modal').classList.remove('open'); }
+
+function runAiGenerate() {
+  var prompt=(document.getElementById('ai-prompt').value||'').trim();
+  if(!prompt){ showToast('Por favor describe tu proyecto primero.'); return; }
+  var btn=document.getElementById('ai-gen-btn');
+  btn.disabled=true;
+  btn.innerHTML='<div class="spinner"></div> Analizando...';
+  setTimeout(function(){
+    var resp=AI_RESPONSES[Math.floor(Math.random()*AI_RESPONSES.length)];
+    calcItems=resp.items.map(function(i){ return {desc:i.desc,qty:i.qty,unit:i.unit,price:i.price}; });
+    currentAiExplanation=resp.explanation;
+    var box=document.getElementById('ai-explanation-box');
+    box.style.display='block';
+    document.getElementById('ai-explanation-text').textContent=resp.explanation;
+    renderCalcItems();
+    closeAiModal();
+    document.getElementById('ai-prompt').value='';
+    btn.disabled=false;
+    btn.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Generar Estimación';
+    showToast('Estimación generada con IA.', 'success');
+  },1800);
+}
+
+// ── SPIN ANIMATION ───────────────────────────────────────────────────
+var s=document.createElement('style');
+s.textContent='@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}';
+document.head.appendChild(s);
+
+// ── INIT ─────────────────────────────────────────────────────────────
+initCalculator();
+
+
+// ══════════════════════════════════════════════════
+// PWA: MANIFEST DINÁMICO
+// Se genera el manifest como Blob URL desde JavaScript
+// para que funcione aunque el archivo sea local (.html).
+// Incluye íconos SVG inline (no requiere archivos externos).
+// ══════════════════════════════════════════════════
+(function initPWAManifest() {
+  var manifest = {
+    name: 'BuildSmart — Estimación de Costos',
+    short_name: 'BuildSmart',
+    description: 'Plataforma profesional de estimación de costos de construcción.',
+    start_url: window.location.href,  // URL de inicio = archivo actual
+    display: 'standalone',            // Modo app nativa (sin barra del navegador)
+    background_color: '#0f172a',      // Color del splash nativo del OS
+    theme_color: '#005aff',           // Color de la barra de estado
+    orientation: 'portrait-primary',  // Orientación preferida en móvil
+    categories: ['business', 'productivity'],
+    lang: 'es',
+    icons: [
+      {
+        // Ícono SVG universal (escalable a cualquier tamaño)
+        src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='44' fill='%23005aff'/%3E%3Crect x='40' y='32' width='72' height='96' rx='8' stroke='white' stroke-width='7' fill='none'/%3E%3Cline x1='55' y1='58' x2='97' y2='58' stroke='white' stroke-width='6' stroke-linecap='round'/%3E%3Cline x1='55' y1='76' x2='97' y2='76' stroke='white' stroke-width='6' stroke-linecap='round'/%3E%3Cline x1='55' y1='94' x2='78' y2='94' stroke='white' stroke-width='6' stroke-linecap='round'/%3E%3Ccircle cx='138' cy='138' r='34' stroke='rgba(255,255,255,0.4)' stroke-width='6' fill='none'/%3E%3Cpath d='M124 138l10 10 18-18' stroke='white' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E",
+        sizes: '192x192',
+        type: 'image/svg+xml',
+        purpose: 'any maskable'
+      },
+      {
+        src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='115' fill='%23005aff'/%3E%3Crect x='100' y='80' width='190' height='256' rx='20' stroke='white' stroke-width='18' fill='none'/%3E%3Cline x1='138' y1='148' x2='252' y2='148' stroke='white' stroke-width='16' stroke-linecap='round'/%3E%3Cline x1='138' y1='196' x2='252' y2='196' stroke='white' stroke-width='16' stroke-linecap='round'/%3E%3Cline x1='138' y1='244' x2='196' y2='244' stroke='white' stroke-width='16' stroke-linecap='round'/%3E%3Ccircle cx='362' cy='362' r='90' stroke='rgba(255,255,255,0.35)' stroke-width='16' fill='none'/%3E%3Cpath d='M330 362l26 26 48-48' stroke='white' stroke-width='16' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E",
+        sizes: '512x512',
+        type: 'image/svg+xml',
+        purpose: 'any maskable'
+      }
+    ],
+    screenshots: []
+  };
+
+  // Crear Blob URL del manifest (permite usarlo sin servidor)
+  var blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+  var url = URL.createObjectURL(blob);
+  document.getElementById('pwa-manifest-link').setAttribute('href', url);
+})();
+
+// ══════════════════════════════════════════════════
+// PWA: SERVICE WORKER INLINE
+// Se registra un Service Worker desde un Blob URL para
+// funcionar sin necesidad de un archivo sw.js externo.
+// Implementa estrategia Cache-First para recursos estáticos
+// y Network-First para Firebase (datos en tiempo real).
+// ══════════════════════════════════════════════════
+(function registerServiceWorker() {
+  if (!('serviceWorker' in navigator)) return; // Verificar soporte
+
+  var swCode = `
+    // ── SERVICE WORKER DE BUILDSMART ──────────────────
+    var CACHE_NAME = 'buildsmart-v1';
+
+    // Recursos a pre-cachear en la instalación del SW
+    var PRECACHE_URLS = [
+      'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Oswald:wght@400;500;600;700&display=swap',
+      'https://cdn.tailwindcss.com',
+      'https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=800&q=80'
+    ];
+
+    // Instalación: pre-cachear recursos clave
+    self.addEventListener('install', function(event) {
+      event.waitUntil(
+        caches.open(CACHE_NAME).then(function(cache) {
+          return cache.addAll(PRECACHE_URLS).catch(function() {
+            // Si algún recurso falla, no bloquear la instalación
+          });
+        }).then(function() {
+          return self.skipWaiting(); // Activar de inmediato
+        })
+      );
+    });
+
+    // Activación: limpiar caches antiguas
+    self.addEventListener('activate', function(event) {
+      event.waitUntil(
+        caches.keys().then(function(keys) {
+          return Promise.all(
+            keys.filter(function(k) { return k !== CACHE_NAME; })
+               .map(function(k) { return caches.delete(k); })
+          );
+        }).then(function() {
+          return self.clients.claim(); // Tomar control inmediato
+        })
+      );
+    });
+
+    // Fetch: estrategia híbrida según el tipo de recurso
+    self.addEventListener('fetch', function(event) {
+      var url = event.request.url;
+
+      // Firebase y APIs externas: Network-First (datos frescos)
+      if (url.includes('firebase') || url.includes('firebaseio') || url.includes('googleapis')) {
+        event.respondWith(
+          fetch(event.request).catch(function() {
+            return caches.match(event.request);
+          })
+        );
+        return;
+      }
+
+      // Fuentes y CDN: Cache-First (rendimiento)
+      if (url.includes('fonts.') || url.includes('tailwindcss') || url.includes('unsplash')) {
+        event.respondWith(
+          caches.match(event.request).then(function(cached) {
+            return cached || fetch(event.request).then(function(response) {
+              var toCache = response.clone();
+              caches.open(CACHE_NAME).then(function(cache) {
+                cache.put(event.request, toCache);
+              });
+              return response;
+            });
+          })
+        );
+        return;
+      }
+
+      // Todo lo demás: Network-First con fallback a cache
+      event.respondWith(
+        fetch(event.request).then(function(response) {
+          var toCache = response.clone();
+          caches.open(CACHE_NAME).then(function(cache) {
+            cache.put(event.request, toCache);
+          });
+          return response;
+        }).catch(function() {
+          return caches.match(event.request);
+        })
+      );
+    });
+  `;
+
+  // Crear Blob del Service Worker y registrarlo
+  var swBlob = new Blob([swCode], { type: 'application/javascript' });
+  var swUrl = URL.createObjectURL(swBlob);
+
+  navigator.serviceWorker.register(swUrl).then(function(reg) {
+    console.log('[BuildSmart PWA] Service Worker registrado:', reg.scope);
+  }).catch(function(err) {
+    console.warn('[BuildSmart PWA] Error registrando SW:', err);
+  });
+})();
+
+// ══════════════════════════════════════════════════
+// PWA: LÓGICA DE INSTALACIÓN
+// Captura el evento beforeinstallprompt para mostrarlo
+// en el momento adecuado (banner personalizado).
+// También detecta si ya está instalada (standalone).
+// ══════════════════════════════════════════════════
+var pwaInstallPrompt = null; // Guardar el evento para usarlo después
+
+// El navegador dispara esto cuando la app es instalable
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault(); // Evitar el mini-infobar nativo del navegador
+  pwaInstallPrompt = e; // Guardar para usarlo cuando el usuario haga clic
+
+  // No mostrar el banner si ya está instalado en standalone
+  if (window.matchMedia('(display-mode: standalone)').matches) return;
+
+  // No mostrar si el usuario ya lo descartó en esta sesión
+  if (sessionStorage.getItem('pwa-banner-dismissed')) return;
+
+  // Mostrar banner según el dispositivo (CSS diferencia el layout)
+  showPwaBanner();
+});
+
+// El OS notifica cuando la app fue instalada exitosamente
+window.addEventListener('appinstalled', function() {
+  hidePwaBanner();
+  pwaInstallPrompt = null;
+  showToast('¡BuildSmart instalado correctamente! 🎉', 'success');
+});
+
+function showPwaBanner() {
+  var banner = document.getElementById('pwa-install-banner');
+  if (!banner) return;
+  banner.classList.add('show');
+  // En desktop: agregar padding-top para que el contenido no quede tapado
+  if (window.innerWidth >= 769) {
+    document.body.classList.add('banner-visible');
+  }
+}
+
+function hidePwaBanner() {
+  var banner = document.getElementById('pwa-install-banner');
+  if (!banner) return;
+  banner.classList.remove('show');
+  document.body.classList.remove('banner-visible');
+}
+
+// El usuario hizo clic en "Instalar App" — activar el prompt nativo del OS
+function triggerPwaInstall() {
+  if (!pwaInstallPrompt) return;
+  pwaInstallPrompt.prompt(); // Abrir el diálogo nativo de instalación
+  pwaInstallPrompt.userChoice.then(function(result) {
+    if (result.outcome === 'accepted') {
+      hidePwaBanner();
+    }
+    pwaInstallPrompt = null;
+  });
+}
+
+// El usuario cerró el banner sin instalar
+function dismissPwaBanner() {
+  hidePwaBanner();
+  sessionStorage.setItem('pwa-banner-dismissed', '1'); // No volver a mostrar en esta sesión
+}
+
+// ══════════════════════════════════════════════════
+// PWA: DETECCIÓN DE MODO STANDALONE (APP INSTALADA)
+// Cuando la app se abre desde el ícono del teléfono
+// (display-mode: standalone), se activan:
+// 1. La splash screen de bienvenida (1.8s)
+// 2. El header móvil (reemplaza el navbar web)
+// 3. La barra de navegación inferior estilo app
+// ══════════════════════════════════════════════════
+(function detectStandaloneMode() {
+  // Verificar si está corriendo como PWA instalada
+  var isStandalone = window.matchMedia('(display-mode: standalone)').matches
+    || window.navigator.standalone === true; // Safari iOS
+  var isMobile = window.innerWidth < 769;
+
+  if (isStandalone && isMobile) {
+    // Activar estilos de app móvil nativa
+    document.body.classList.add('pwa-mobile');
+
+    // Mostrar splash screen solo en móvil instalado
+    var splash = document.getElementById('mobile-splash');
+    if (splash) {
+      splash.style.display = 'flex';
+
+      // Ocultar splash después de 1.8 segundos con fade out
+      setTimeout(function() {
+        splash.style.transition = 'opacity 0.5s ease';
+        splash.style.opacity = '0';
+        setTimeout(function() {
+          splash.style.display = 'none';
+        }, 500);
+      }, 1800);
+    }
+  }
+})();
+
+// ══════════════════════════════════════════════════
+// PWA: SINCRONIZACIÓN DE LA BARRA DE NAV MÓVIL
+// Cuando showPage() cambia la vista, se actualiza
+// cuál ítem de la barra inferior está activo (.active).
+// ══════════════════════════════════════════════════
+var _origShowPage = window.showPage || function(){};
+window.showPage = function(id) {
+  _origShowPage(id); // Ejecutar la función original
+
+  // Sincronizar íconos de la barra inferior móvil
+  ['home','calculator','dashboard','guides'].forEach(function(tab) {
+    var el = document.getElementById('mnav-' + tab);
+    if (el) el.classList.toggle('active', tab === id || (tab === 'dashboard' && id === 'project'));
+  });
+};
+
+// ══════════════════════════════════════════════════
+// PWA: ACTUALIZACIÓN DEL AVATAR EN HEADER MÓVIL
+// Cuando el usuario inicia sesión, actualizamos también
+// el botón de avatar del header nativo de la app.
+// ══════════════════════════════════════════════════
+var _origOnUserLoggedIn = window.onUserLoggedIn;
+window.onUserLoggedIn = function(user) {
+  if (_origOnUserLoggedIn) _origOnUserLoggedIn(user);
+  // Actualizar inicial del usuario en el header móvil
+  var mobileAvatar = document.getElementById('mobile-hdr-avatar');
+  if (mobileAvatar) {
+    var displayName = user.displayName || user.email.split('@')[0];
+    mobileAvatar.textContent = displayName.charAt(0).toUpperCase();
+  }
+};
+
+
+</script>
+</body>
+</html>
