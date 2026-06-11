@@ -2210,9 +2210,22 @@ function dismissPwaBanner() {
   // Verificar si está corriendo como PWA instalada
   var isStandalone = window.matchMedia('(display-mode: standalone)').matches
     || window.navigator.standalone === true; // Safari iOS
-  var isMobile = window.innerWidth < 769;
 
-  if (isStandalone && isMobile) {
+  // Detectar móvil de forma estable: táctil + pantalla pequeña física.
+  // NO usar innerWidth porque cambia al redimensionar la ventana PWA en desktop.
+  var isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+  var isSmallScreen = window.screen.width < 769; // screen.width es fijo, no cambia con resize
+
+  // Un dispositivo móvil real: debe ser táctil Y tener pantalla física pequeña.
+  // En desktop instalado como PWA, screen.width suele ser >= 769 o no hay touch,
+  // por lo que esta condición no se cumple aunque se redimensione la ventana.
+  var isMobile = isTouchDevice && isSmallScreen;
+
+  // Guardar el resultado FIJO para el resto de la sesión.
+  // Esto evita que patchShowPage() lo recalcule con innerWidth dinámico.
+  window._pwaStandaloneMobile = isStandalone && isMobile;
+
+  if (window._pwaStandaloneMobile) {
     // Activar estilos de app móvil nativa
     document.body.classList.add('pwa-mobile');
 
@@ -2230,10 +2243,6 @@ function dismissPwaBanner() {
         }, 500);
       }, 1800);
     }
-
-    // En PWA instalada el login redirige a calculadora (ver onUserLoggedIn)
-    // Marcar para que onUserLoggedIn lo sepa
-    window._pwaStandaloneMobile = true;
   }
 })();
 
@@ -2247,11 +2256,9 @@ function dismissPwaBanner() {
 (function patchShowPage() {
   var _orig = window.showPage;
   window.showPage = function(id) {
-    // En PWA standalone MÓVIL exclusivamente, redirigir 'home' → 'mobile-home'
-    var isStandaloneMobile = (
-      (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true)
-      && window.innerWidth < 769
-    );
+    // Usar el flag fijo calculado al inicio — NO recalcular con innerWidth dinámico.
+    // Así la detección no cambia si el usuario redimensiona la ventana PWA en desktop.
+    var isStandaloneMobile = !!window._pwaStandaloneMobile;
     // Solo redirigir si es mobile standalone Y la página pedida es exactamente 'home'
     // No redirigir si explícitamente se pidió 'mobile-home'
     if (isStandaloneMobile && id === 'home') { id = 'mobile-home'; }
