@@ -636,6 +636,9 @@
       .toast { bottom: auto; top: calc(var(--safe-top) + 70px); right: 1rem; left: 1rem; min-width: unset; }
     }
 
+    /* Footer: oculto en modo PWA móvil instalado */
+    body.pwa-mobile #web-footer { display: none !important; }
+
 
     /* ══════════════════════════════════════════════════
        CALCULADORA RESPONSIVE — MÓVIL
@@ -1334,6 +1337,48 @@
     <span class="mnav-label">Guías</span>
   </button>
 </div>
+
+<!-- ══════════════════════════════════════════════════
+     FOOTER WEB (solo visible fuera de modo pwa-mobile)
+════════════════════════════════════════════════════ -->
+<footer id="web-footer" style="background:#0f172a;color:rgba(255,255,255,0.65);padding:3.5rem 1.5rem 2rem;margin-top:0;">
+  <div style="max-width:1100px;margin:0 auto;">
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:3rem;margin-bottom:2.5rem;" class="mob-grid-1">
+      <!-- Marca -->
+      <div>
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem;">
+          <div style="background:var(--primary);color:white;border-radius:7px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-family:'Oswald',sans-serif;font-size:1rem;font-weight:800;flex-shrink:0;">B</div>
+          <span style="font-family:'Oswald',sans-serif;font-size:1.25rem;font-weight:700;color:white;text-transform:none;">Build<span style="color:var(--primary);">Smart</span></span>
+        </div>
+        <p style="font-size:0.88rem;line-height:1.75;max-width:280px;">Plataforma profesional de estimación de costos de construcción. Calcula, gestiona y aprende con precisión.</p>
+      </div>
+      <!-- App -->
+      <div>
+        <p style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.35);margin-bottom:1rem;">La App</p>
+        <div style="display:flex;flex-direction:column;gap:0.55rem;">
+          <span onclick="showPage('calculator')" style="font-size:0.88rem;color:rgba(255,255,255,0.65);cursor:pointer;transition:color 0.2s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='rgba(255,255,255,0.65)'">Calculadora</span>
+          <span onclick="showPage('dashboard')" style="font-size:0.88rem;color:rgba(255,255,255,0.65);cursor:pointer;transition:color 0.2s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='rgba(255,255,255,0.65)'">Mis Proyectos</span>
+          <span onclick="showPage('guides')" style="font-size:0.88rem;color:rgba(255,255,255,0.65);cursor:pointer;transition:color 0.2s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='rgba(255,255,255,0.65)'">Guías de Construcción</span>
+        </div>
+      </div>
+      <!-- Info -->
+      <div>
+        <p style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.35);margin-bottom:1rem;">Características</p>
+        <div style="display:flex;flex-direction:column;gap:0.55rem;">
+          <span style="font-size:0.88rem;">✦ Estimación con IA</span>
+          <span style="font-size:0.88rem;">✦ Sincronización en la nube</span>
+          <span style="font-size:0.88rem;">✦ Funciona sin conexión</span>
+          <span style="font-size:0.88rem;">✦ Instala como app</span>
+        </div>
+      </div>
+    </div>
+    <!-- Bottom bar -->
+    <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+      <p style="font-size:0.78rem;">© 2025 BuildSmart. Todos los derechos reservados.</p>
+      <p style="font-size:0.78rem;">Construye con <span style="color:var(--primary);font-weight:600;">Precisión</span>, Planea con <span style="color:var(--secondary);font-weight:600;">Confianza</span></p>
+    </div>
+  </div>
+</footer>
 
 </div><!-- /main-app -->
 
