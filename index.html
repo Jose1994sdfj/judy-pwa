@@ -627,6 +627,8 @@
     body.pwa-mobile nav#web-navbar { display: none !important; }
     body.pwa-mobile #mobile-app-header { display: flex !important; }
     body.pwa-mobile #mobile-nav-bar { display: flex !important; }
+    /* En PWA instalada, el botón Inicio no aplica — se oculta */
+    body.pwa-mobile #mnav-home { display: none !important; }
 
 
     /* Toast ajuste en móvil: aparece arriba para no chocar con nav inferior */
@@ -2163,6 +2165,10 @@ function dismissPwaBanner() {
 (function patchShowPage() {
   var _orig = window.showPage;
   window.showPage = function(id) {
+    // En PWA standalone, la home no existe — redirigir a calculadora
+    var isStandalone = window.matchMedia('(display-mode: standalone)').matches
+                       || window.navigator.standalone === true;
+    if (isStandalone && id === 'home') { id = 'calculator'; }
     _orig(id);
     // Actualizar íconos de la barra inferior móvil
     ['home','calculator','dashboard','guides'].forEach(function(tab) {
