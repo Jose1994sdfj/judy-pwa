@@ -627,8 +627,8 @@
     body.pwa-mobile nav#web-navbar { display: none !important; }
     body.pwa-mobile #mobile-app-header { display: flex !important; }
     body.pwa-mobile #mobile-nav-bar { display: flex !important; }
-    /* En PWA instalada, el botón Inicio apunta al dashboard móvil — sí se muestra */
-    /* body.pwa-mobile #mnav-home { display: none !important; } <- eliminado */
+    /* En PWA instalada, el botón Inicio no aplica — se oculta */
+    body.pwa-mobile #mnav-home { display: none !important; }
 
 
     /* Toast ajuste en móvil: aparece arriba para no chocar con nav inferior */
@@ -1094,88 +1094,6 @@
   </div>
 </div>
 
-<!-- ── DASHBOARD MÓVIL ──────────────────────────
-     Pantalla de inicio exclusiva para PWA móvil standalone.
-     Saludo + acceso rápido a las 3 secciones principales.
-══════════════════════════════════════════════════ -->
-<div id="page-mobile-home" class="page">
-  <div style="padding:1.5rem 1.2rem 2rem;">
-
-    <!-- Saludo -->
-    <div style="margin-bottom:2rem;">
-      <p style="font-size:0.85rem;color:var(--muted-fg);margin-bottom:0.2rem;text-transform:uppercase;letter-spacing:0.06em;font-weight:600;">Bienvenido</p>
-      <h1 id="mob-home-greeting" style="font-family:'Oswald',sans-serif;font-size:2rem;font-weight:700;line-height:1.1;">
-        Hola 👋
-      </h1>
-      <p style="font-size:0.9rem;color:var(--muted-fg);margin-top:0.4rem;">¿Qué quieres hacer hoy?</p>
-    </div>
-
-    <!-- Card principal: Calcular -->
-    <button onclick="showPage('calculator')" style="
-      display:flex;align-items:center;gap:1.1rem;
-      width:100%;padding:1.4rem 1.3rem;margin-bottom:1rem;
-      background:var(--primary);color:white;
-      border:none;border-radius:1rem;cursor:pointer;
-      box-shadow:0 6px 24px rgba(0,90,255,0.35);
-      text-align:left;
-    ">
-      <div style="width:48px;height:48px;background:rgba(255,255,255,0.2);border-radius:0.75rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="13" y2="14"/></svg>
-      </div>
-      <div>
-        <div style="font-family:'Oswald',sans-serif;font-size:1.15rem;font-weight:700;letter-spacing:0.02em;">Nueva Estimación</div>
-        <div style="font-size:0.8rem;opacity:0.85;margin-top:0.15rem;">Calcula materiales y costos al instante</div>
-      </div>
-      <svg style="margin-left:auto;flex-shrink:0;" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
-    </button>
-
-    <!-- Cards secundarias: 2 columnas -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-
-      <!-- Proyectos -->
-      <button onclick="showPage('dashboard')" style="
-        display:flex;flex-direction:column;align-items:flex-start;gap:0.7rem;
-        padding:1.2rem 1.1rem;
-        background:white;border:1.5px solid var(--border);
-        border-radius:1rem;cursor:pointer;text-align:left;
-        box-shadow:0 2px 12px rgba(0,0,0,0.06);
-      ">
-        <div style="width:40px;height:40px;background:rgba(0,90,255,0.1);border-radius:0.65rem;display:flex;align-items:center;justify-content:center;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
-        </div>
-        <div>
-          <div style="font-family:'Oswald',sans-serif;font-size:1rem;font-weight:700;color:var(--fg);">Proyectos</div>
-          <div style="font-size:0.75rem;color:var(--muted-fg);margin-top:0.1rem;">Ver y gestionar</div>
-        </div>
-      </button>
-
-      <!-- Guías -->
-      <button onclick="showPage('guides')" style="
-        display:flex;flex-direction:column;align-items:flex-start;gap:0.7rem;
-        padding:1.2rem 1.1rem;
-        background:white;border:1.5px solid var(--border);
-        border-radius:1rem;cursor:pointer;text-align:left;
-        box-shadow:0 2px 12px rgba(0,0,0,0.06);
-      ">
-        <div style="width:40px;height:40px;background:rgba(255,140,0,0.12);border-radius:0.65rem;display:flex;align-items:center;justify-content:center;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e67e00" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
-        </div>
-        <div>
-          <div style="font-family:'Oswald',sans-serif;font-size:1rem;font-weight:700;color:var(--fg);">Guías</div>
-          <div style="font-size:0.75rem;color:var(--muted-fg);margin-top:0.1rem;">Aprende el oficio</div>
-        </div>
-      </button>
-
-    </div>
-
-    <!-- Frase motivacional pequeña -->
-    <p style="text-align:center;font-size:0.78rem;color:var(--muted-fg);margin-top:2rem;opacity:0.7;">
-      BuildSmart · Construye con precisión
-    </p>
-
-  </div>
-</div>
-
 <!-- ── CALCULADORA ───────────────────────────── -->
 <div id="page-calculator" class="page">
   <div style="max-width:1100px;margin:0 auto;padding:2.5rem 1.5rem;">
@@ -1309,7 +1227,7 @@
      La clase .active se gestiona desde showPage().
 ══════════════════════════════════════════════════ -->
 <div id="mobile-nav-bar" style="display:flex;">
-  <button class="mnav-item active" id="mnav-home" onclick="showPage('mobile-home')">
+  <button class="mnav-item active" id="mnav-home" onclick="showPage('home')">
     <div class="mnav-icon-wrap">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/></svg>
     </div>
@@ -2210,22 +2128,9 @@ function dismissPwaBanner() {
   // Verificar si está corriendo como PWA instalada
   var isStandalone = window.matchMedia('(display-mode: standalone)').matches
     || window.navigator.standalone === true; // Safari iOS
+  var isMobile = window.innerWidth < 769;
 
-  // Detectar móvil de forma estable: táctil + pantalla pequeña física.
-  // NO usar innerWidth porque cambia al redimensionar la ventana PWA en desktop.
-  var isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-  var isSmallScreen = window.screen.width < 769; // screen.width es fijo, no cambia con resize
-
-  // Un dispositivo móvil real: debe ser táctil Y tener pantalla física pequeña.
-  // En desktop instalado como PWA, screen.width suele ser >= 769 o no hay touch,
-  // por lo que esta condición no se cumple aunque se redimensione la ventana.
-  var isMobile = isTouchDevice && isSmallScreen;
-
-  // Guardar el resultado FIJO para el resto de la sesión.
-  // Esto evita que patchShowPage() lo recalcule con innerWidth dinámico.
-  window._pwaStandaloneMobile = isStandalone && isMobile;
-
-  if (window._pwaStandaloneMobile) {
+  if (isStandalone && isMobile) {
     // Activar estilos de app móvil nativa
     document.body.classList.add('pwa-mobile');
 
@@ -2243,6 +2148,10 @@ function dismissPwaBanner() {
         }, 500);
       }, 1800);
     }
+
+    // En PWA instalada el login redirige a calculadora (ver onUserLoggedIn)
+    // Marcar para que onUserLoggedIn lo sepa
+    window._pwaStandaloneMobile = true;
   }
 })();
 
@@ -2256,33 +2165,17 @@ function dismissPwaBanner() {
 (function patchShowPage() {
   var _orig = window.showPage;
   window.showPage = function(id) {
-    // Usar el flag fijo calculado al inicio — NO recalcular con innerWidth dinámico.
-    // Así la detección no cambia si el usuario redimensiona la ventana PWA en desktop.
-    var isStandaloneMobile = !!window._pwaStandaloneMobile;
-    // Solo redirigir si es mobile standalone Y la página pedida es exactamente 'home'
-    // No redirigir si explícitamente se pidió 'mobile-home'
-    if (isStandaloneMobile && id === 'home') { id = 'mobile-home'; }
-
+    // En PWA standalone MÓVIL, la home no existe — redirigir a calculadora
+    // En desktop standalone la home sí se muestra (tiene sentido como landing)
+    var isStandalone = window.matchMedia('(display-mode: standalone)').matches
+                       || window.navigator.standalone === true;
+    var isMobile = window.innerWidth < 769;
+    if (isStandalone && isMobile && id === 'home') { id = 'calculator'; }
     _orig(id);
-
-    // Actualizar saludo si se navega a mobile-home
-    if (id === 'mobile-home' && typeof currentUser !== 'undefined' && currentUser) {
-      var greeting = document.getElementById('mob-home-greeting');
-      if (greeting) {
-        var name = (currentUser.displayName || currentUser.email.split('@')[0] || '').split(' ')[0];
-        greeting.innerHTML = 'Hola, <span style="color:var(--primary)">' + name + '</span> 👋';
-      }
-    }
-
     // Actualizar íconos de la barra inferior móvil
-    // 'home' activa mnav-home; 'mobile-home' también activa mnav-home
     ['home','calculator','dashboard','guides'].forEach(function(tab) {
       var el = document.getElementById('mnav-' + tab);
-      if (!el) return;
-      var isActive = tab === id
-        || (tab === 'home' && id === 'mobile-home')
-        || (tab === 'dashboard' && id === 'project');
-      el.classList.toggle('active', isActive);
+      if (el) el.classList.toggle('active', tab === id || (tab === 'dashboard' && id === 'project'));
     });
   };
 })();
@@ -2303,15 +2196,9 @@ window.onUserLoggedIn = function(user) {
     mobileAvatar.textContent = displayName.charAt(0).toUpperCase();
   }
 
-  // En PWA standalone MÓVIL exclusivamente: ir al dashboard móvil, no a la home informativa
+  // En PWA standalone móvil: ir directo a calculadora, no a la home informativa
   if (window._pwaStandaloneMobile) {
-    // Personalizar saludo con el nombre del usuario
-    var greeting = document.getElementById('mob-home-greeting');
-    if (greeting) {
-      var name = (currentUser.displayName || currentUser.email.split('@')[0] || '').split(' ')[0];
-      greeting.innerHTML = 'Hola, <span style="color:var(--primary)">' + name + '</span> 👋';
-    }
-    setTimeout(function(){ showPage('mobile-home'); }, 100);
+    setTimeout(function(){ showPage('calculator'); }, 100);
   }
 
   // Mostrar banner de instalación AHORA que el usuario ya inició sesión
