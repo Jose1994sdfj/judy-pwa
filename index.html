@@ -160,9 +160,9 @@
     }
     .auth-logo-text {
       font-family: 'Oswald', sans-serif; font-size: 1.55rem;
-      font-weight: 700; color: white; text-transform: none;
+      font-weight: 700; color: white !important; text-transform: none;
     }
-    .auth-logo-text span { color: var(--primary); }
+    .auth-logo-text span { color: var(--primary) !important; }
 
     .auth-tabs {
       display: flex; gap: 0; margin-bottom: 1.8rem;
@@ -171,39 +171,48 @@
     .auth-tab {
       flex: 1; padding: 0.5rem; text-align: center;
       font-size: 0.82rem; font-weight: 600; cursor: pointer;
-      border-radius: 0.45rem; color: rgba(255,255,255,0.5);
+      border-radius: 0.45rem; color: rgba(255,255,255,0.5) !important;
       transition: all 0.2s; border: none; background: transparent;
     }
     .auth-tab.active {
-      background: rgba(255,255,255,0.12); color: white;
+      background: rgba(255,255,255,0.12) !important; color: white !important;
       box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     }
 
     .auth-input-group { margin-bottom: 1rem; }
     .auth-label {
       display: block; font-size: 0.75rem; font-weight: 600;
-      color: rgba(255,255,255,0.6); margin-bottom: 0.4rem;
+      color: rgba(255,255,255,0.75) !important; margin-bottom: 0.4rem;
       text-transform: uppercase; letter-spacing: 0.06em;
     }
     .auth-input {
       width: 100%; padding: 0.7rem 0.9rem;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 0.5rem; color: white;
+      background: rgba(255,255,255,0.08) !important;
+      border: 1px solid rgba(255,255,255,0.15) !important;
+      border-radius: 0.5rem; color: #ffffff !important;
       font-family: 'Inter', sans-serif; font-size: 0.9rem;
       outline: none; transition: all 0.2s;
+      -webkit-text-fill-color: #ffffff !important;
     }
-    .auth-input::placeholder { color: rgba(255,255,255,0.3); }
+    .auth-input::placeholder { color: rgba(255,255,255,0.35) !important; opacity: 1 !important; }
     .auth-input:focus {
-      border-color: rgba(0,120,255,0.7);
-      background: rgba(255,255,255,0.1);
-      box-shadow: 0 0 0 3px rgba(0,90,255,0.2);
+      border-color: rgba(0,120,255,0.7) !important;
+      background: rgba(255,255,255,0.12) !important;
+      box-shadow: 0 0 0 3px rgba(0,90,255,0.2) !important;
     }
-    .auth-input.error { border-color: rgba(239,68,68,0.7); }
+    /* Autofill: evita que Chrome ponga fondo blanco */
+    .auth-input:-webkit-autofill,
+    .auth-input:-webkit-autofill:hover,
+    .auth-input:-webkit-autofill:focus {
+      -webkit-box-shadow: 0 0 0 100px rgba(15,23,70,0.95) inset !important;
+      -webkit-text-fill-color: #ffffff !important;
+      caret-color: #ffffff !important;
+    }
+    .auth-input.error { border-color: rgba(239,68,68,0.7) !important; }
 
     .auth-btn-primary {
       width: 100%; padding: 0.82rem;
-      background: var(--primary); color: white;
+      background: var(--primary); color: white !important;
       border: none; border-radius: 0.55rem;
       font-family: 'Inter', sans-serif; font-size: 0.9rem; font-weight: 700;
       cursor: pointer; transition: all 0.2s; margin-top: 0.5rem;
@@ -216,7 +225,7 @@
 
     .auth-divider {
       text-align: center; margin: 1.3rem 0 0.8rem;
-      font-size: 0.75rem; color: rgba(255,255,255,0.3);
+      font-size: 0.75rem; color: rgba(255,255,255,0.4) !important;
       position: relative;
     }
     .auth-divider::before, .auth-divider::after {
@@ -252,7 +261,7 @@
 
     .auth-footer {
       text-align: center; margin-top: 1.5rem;
-      font-size: 0.75rem; color: rgba(255,255,255,0.3);
+      font-size: 0.75rem; color: rgba(255,255,255,0.4) !important;
     }
 
     /* ── SPINNER ─────────────────────────────────────────────────── */
