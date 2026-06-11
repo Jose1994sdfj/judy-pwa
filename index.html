@@ -628,6 +628,16 @@
     body.pwa-mobile #mobile-app-header { display: flex !important; }
     body.pwa-mobile #mobile-nav-bar { display: flex !important; }
 
+    /* ── MÓVIL BROWSER: ocultar la home landing y el nav link de Inicio ──
+       En pantallas < 769px el usuario va directo a la calculadora.
+       Se oculta el hero y secciones informativas de la home page,
+       pero el wrapper #page-home sigue existiendo en el DOM
+       para que showPage/nav no se rompan. */
+    @media (max-width: 768px) {
+      #page-home > section { display: none !important; }
+      #nav-home { display: none !important; }
+    }
+
     /* Toast ajuste en móvil: aparece arriba para no chocar con nav inferior */
     @media (max-width: 768px) {
       .toast { bottom: auto; top: calc(var(--safe-top) + 70px); right: 1rem; left: 1rem; min-width: unset; }
@@ -2095,12 +2105,24 @@ window.showPage = function(id) {
 var _origOnUserLoggedIn = window.onUserLoggedIn;
 window.onUserLoggedIn = function(user) {
   if (_origOnUserLoggedIn) _origOnUserLoggedIn(user);
+
   // Actualizar inicial del usuario en el header móvil
   var mobileAvatar = document.getElementById('mobile-hdr-avatar');
   if (mobileAvatar) {
     var displayName = user.displayName || user.email.split('@')[0];
     mobileAvatar.textContent = displayName.charAt(0).toUpperCase();
   }
+
+  // ── MÓVIL: redirigir a Calculadora como pantalla de inicio ──
+  // En móvil (ancho < 769px) y fuera de modo standalone, saltamos la
+  // landing informativa y vamos directo a la calculadora.
+  var isMobile = window.innerWidth < 769;
+  var isStandalone = window.matchMedia('(display-mode: standalone)').matches
+                     || window.navigator.standalone === true;
+  if (isMobile && !isStandalone) {
+    showPage('calculator');
+  }
+
   // Mostrar banner de instalación AHORA que el usuario ya inició sesión
   // Solo si hay prompt disponible, no está en standalone y no fue descartado
   if (pwaInstallPrompt
