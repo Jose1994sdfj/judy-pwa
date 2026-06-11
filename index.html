@@ -628,21 +628,76 @@
     body.pwa-mobile #mobile-app-header { display: flex !important; }
     body.pwa-mobile #mobile-nav-bar { display: flex !important; }
 
-    /* ── MÓVIL BROWSER: ocultar la home landing y el nav link de Inicio ──
-       En pantallas < 769px el usuario va directo a la calculadora.
-       Se oculta el hero y secciones informativas de la home page,
-       pero el wrapper #page-home sigue existiendo en el DOM
-       para que showPage/nav no se rompan. */
-    @media (max-width: 768px) {
-      #page-home > section { display: none !important; }
-      #nav-home { display: none !important; }
-    }
 
     /* Toast ajuste en móvil: aparece arriba para no chocar con nav inferior */
     @media (max-width: 768px) {
       .toast { bottom: auto; top: calc(var(--safe-top) + 70px); right: 1rem; left: 1rem; min-width: unset; }
     }
 
+
+    /* ══════════════════════════════════════════════════
+       CALCULADORA RESPONSIVE — MÓVIL
+       En pantallas pequeñas:
+       - El layout pasa de 2 columnas a 1 columna
+       - El sidebar de total sube arriba del form
+       - La tabla de conceptos se convierte en tarjetas
+         (cada fila = bloque apilado vertical)
+       - Los inputs de la tabla se agrandan para touch
+    ══════════════════════════════════════════════════ */
+    @media (max-width: 768px) {
+
+      /* Calculadora: padding reducido */
+      #page-calculator > div { padding: 1rem 0.75rem !important; }
+      #page-calculator h1 { font-size: 1.4rem !important; margin-bottom: 1rem !important; }
+
+      /* Layout: 1 columna, sidebar abajo */
+      #calc-layout {
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+      }
+
+      /* Tabla: ocultar thead en móvil (JS renderiza tarjetas) */
+      #page-calculator thead { display: none !important; }
+
+      /* Filas móvil: flex-wrap para layout de tarjeta */
+      .calc-row-mob {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 0.4rem 0.5rem !important;
+        padding: 0.7rem 0.6rem !important;
+        border-bottom: 1px solid var(--border) !important;
+        align-items: flex-end !important;
+      }
+      /* Descripción: fila completa */
+      .calc-td-desc { width: 100% !important; display: block !important; }
+      .calc-td-desc .calc-inp { width: 100% !important; font-size: 0.92rem !important; padding: 0.5rem 0.65rem !important; }
+
+      /* Etiquetas mini encima de cada input */
+      .calc-inp-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-fg); margin-bottom: 0.2rem; }
+
+      /* Cantidad: 20% | Unidad: 35% | Precio: 35% */
+      .calc-td-qty   { width: 20% !important; display: block !important; }
+      .calc-td-unit  { width: 35% !important; display: block !important; }
+      .calc-td-price { width: calc(35% - 0.5rem) !important; display: block !important; }
+      .calc-td-qty .calc-inp,
+      .calc-td-unit .calc-inp,
+      .calc-td-price .calc-inp { width: 100% !important; font-size: 0.85rem !important; padding: 0.42rem 0.5rem !important; }
+
+      /* Total + eliminar: última fila */
+      .calc-td-total {
+        flex: 1 !important; display: flex !important; align-items: center !important;
+        justify-content: flex-end !important; font-family: monospace !important;
+        font-weight: 700 !important; font-size: 0.9rem !important; color: var(--primary) !important;
+      }
+      .calc-td-del { display: flex !important; align-items: center !important; }
+
+      /* Botón agregar más grande */
+      #page-calculator .btn-outline { padding: 0.75rem !important; font-size: 0.9rem !important; }
+
+      /* Total bar más compacto */
+      .total-bar p:first-child { font-size: 0.8rem !important; }
+      #calc-grand-total { font-size: 2.2rem !important; }
+    }
   </style>
 </head>
 <body>
@@ -1712,9 +1767,21 @@ function updateCalcProjectSelect() {
 }
 
 function renderCalcItems() {
+  var mob = window.innerWidth < 769;
   var tbody=document.getElementById('calc-items-body');
   tbody.innerHTML=calcItems.map(function(item,i){
     var rowTotal=(item.qty*item.price).toFixed(2);
+    if (mob) {
+      // MÓVIL: cada fila como mini-card
+      return '<tr class="trow calc-row-mob">'
+        +'<td class="calc-td-desc"><input type="text" class="input calc-inp" placeholder="Nombre del concepto" value="'+escHtml(item.desc)+'" oninput="updateItem('+i+',\'desc\',this.value)" /></td>'
+        +'<td class="calc-td-qty"><div class="calc-inp-label">Cant.</div><input type="number" class="input calc-inp" min="0" step="any" value="'+item.qty+'" oninput="updateItem('+i+',\'qty\',this.value)" /></td>'
+        +'<td class="calc-td-unit"><div class="calc-inp-label">Unidad</div><input type="text" class="input calc-inp" value="'+escHtml(item.unit)+'" oninput="updateItem('+i+',\'unit\',this.value)" /></td>'
+        +'<td class="calc-td-price"><div class="calc-inp-label">Precio</div><input type="number" class="input calc-inp" min="0" step="any" value="'+item.price+'" oninput="updateItem('+i+',\'price\',this.value)" /></td>'
+        +'<td class="calc-td-total">$'+parseFloat(rowTotal).toLocaleString('es-MX',{minimumFractionDigits:2})+'</td>'
+        +'<td class="calc-td-del"><button class="btn-danger-sm" onclick="removeCalcRow('+i+')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button></td>'
+        +'</tr>';
+    }
     return '<tr class="trow" style="border-bottom:1px solid var(--border);">'
       +'<td style="padding:0.3rem 0.5rem;"><input type="text" class="input" style="border:none;background:transparent;padding:0.3rem 0;box-shadow:none;" placeholder="Nombre del concepto" value="'+escHtml(item.desc)+'" oninput="updateItem('+i+',\'desc\',this.value)" /></td>'
       +'<td style="padding:0.3rem 0.3rem;"><input type="number" class="input" style="border:none;background:transparent;padding:0.3rem 0;box-shadow:none;width:70px;" min="0" step="any" value="'+item.qty+'" oninput="updateItem('+i+',\'qty\',this.value)" /></td>'
@@ -1726,6 +1793,7 @@ function renderCalcItems() {
   }).join('');
   updateGrandTotal();
 }
+
 
 function updateItem(i,field,val) {
   if(field==='qty'||field==='price') calcItems[i][field]=parseFloat(val)||0;
@@ -2078,6 +2146,10 @@ function dismissPwaBanner() {
         }, 500);
       }, 1800);
     }
+
+    // En PWA instalada el login redirige a calculadora (ver onUserLoggedIn)
+    // Marcar para que onUserLoggedIn lo sepa
+    window._pwaStandaloneMobile = true;
   }
 })();
 
@@ -2086,16 +2158,19 @@ function dismissPwaBanner() {
 // Cuando showPage() cambia la vista, se actualiza
 // cuál ítem de la barra inferior está activo (.active).
 // ══════════════════════════════════════════════════
-var _origShowPage = window.showPage || function(){};
-window.showPage = function(id) {
-  _origShowPage(id); // Ejecutar la función original
-
-  // Sincronizar íconos de la barra inferior móvil
-  ['home','calculator','dashboard','guides'].forEach(function(tab) {
-    var el = document.getElementById('mnav-' + tab);
-    if (el) el.classList.toggle('active', tab === id || (tab === 'dashboard' && id === 'project'));
-  });
-};
+// Sincronizar barra inferior en cada cambio de página
+// Se ejecuta como patch sobre showPage que ya está definida más arriba
+(function patchShowPage() {
+  var _orig = window.showPage;
+  window.showPage = function(id) {
+    _orig(id);
+    // Actualizar íconos de la barra inferior móvil
+    ['home','calculator','dashboard','guides'].forEach(function(tab) {
+      var el = document.getElementById('mnav-' + tab);
+      if (el) el.classList.toggle('active', tab === id || (tab === 'dashboard' && id === 'project'));
+    });
+  };
+})();
 
 // ══════════════════════════════════════════════════
 // PWA: ACTUALIZACIÓN DEL AVATAR EN HEADER MÓVIL
@@ -2113,14 +2188,9 @@ window.onUserLoggedIn = function(user) {
     mobileAvatar.textContent = displayName.charAt(0).toUpperCase();
   }
 
-  // ── MÓVIL: redirigir a Calculadora como pantalla de inicio ──
-  // En móvil (ancho < 769px) y fuera de modo standalone, saltamos la
-  // landing informativa y vamos directo a la calculadora.
-  var isMobile = window.innerWidth < 769;
-  var isStandalone = window.matchMedia('(display-mode: standalone)').matches
-                     || window.navigator.standalone === true;
-  if (isMobile && !isStandalone) {
-    showPage('calculator');
+  // En PWA standalone móvil: ir directo a calculadora, no a la home informativa
+  if (window._pwaStandaloneMobile) {
+    setTimeout(function(){ showPage('calculator'); }, 100);
   }
 
   // Mostrar banner de instalación AHORA que el usuario ya inició sesión
