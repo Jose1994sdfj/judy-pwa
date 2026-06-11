@@ -2165,10 +2165,12 @@ function dismissPwaBanner() {
 (function patchShowPage() {
   var _orig = window.showPage;
   window.showPage = function(id) {
-    // En PWA standalone, la home no existe — redirigir a calculadora
+    // En PWA standalone MÓVIL, la home no existe — redirigir a calculadora
+    // En desktop standalone la home sí se muestra (tiene sentido como landing)
     var isStandalone = window.matchMedia('(display-mode: standalone)').matches
                        || window.navigator.standalone === true;
-    if (isStandalone && id === 'home') { id = 'calculator'; }
+    var isMobile = window.innerWidth < 769;
+    if (isStandalone && isMobile && id === 'home') { id = 'calculator'; }
     _orig(id);
     // Actualizar íconos de la barra inferior móvil
     ['home','calculator','dashboard','guides'].forEach(function(tab) {
