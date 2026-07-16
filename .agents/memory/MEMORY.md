@@ -1,0 +1,2 @@
+- [fpdf2 quirks](fpdf2-quirks.md) — Helvetica latin-1 only; set_draw_color unpacking pattern; bullet width overflow guard needed
+- [BuildSmart PDF structure](buildsmart-pdf-structure.md) — PDF class pattern with cover/toc/section/callout/checklist/cta methods; _build_generic for compact guides
