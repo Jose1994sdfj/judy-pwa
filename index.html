@@ -1835,6 +1835,26 @@ var GUIDES = [
   {id:16,cat:'basics',catLabel:'Fundamentos',title:'Block de Cemento vs Ladrillo Rojo: Comparativa de Costos en México',excerpt:'¿Cuál es más barato construir en México, con block de concreto o tabique rojo? Comparamos precio, resistencia, velocidad y consumo de materiales.',img:'https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=600&q=80',content:'<h2>Precio por m² de Muro Construido</h2><p>Esta es la comparativa más importante: el costo final del muro terminado, no solo del material:</p><ul><li><strong>Block de concreto 15x20x40 cm (colocado):</strong> $320 – $480 MXN/m²</li><li><strong>Tabique rojo recocido (colocado):</strong> $280 – $420 MXN/m²</li></ul><h2>Block de Concreto: Ventajas y Desventajas</h2><ul><li><strong>Ventajas:</strong> Avance más rápido (es 8 veces más grande que un tabique), mejor aislamiento térmico en climas cálidos, más preciso (menos desperdicio de mortero), excelente para zona sísmica cuando se refuerza verticalmente</li><li><strong>Desventajas:</strong> Más pesado, requiere grúa o cargadores para pisos altos, absorbe más humedad si no se impermeabiliza correctamente</li></ul><h2>Tabique Rojo: Ventajas y Desventajas</h2><ul><li><strong>Ventajas:</strong> Mayor resistencia a compresión por cm², más fácil de cortar para instalaciones, mejor agarre de acabados, tradición y disponibilidad en todo México</li><li><strong>Desventajas:</strong> Mayor tiempo de construcción, más mortero de junta, calor en climas cálidos (baja inercia térmica)</li></ul><h2>Recomendación por Zona</h2><p>En el <strong>Bajío y Norte de México</strong> (climas extremos) el block de concreto ofrece mejor aislamiento. En el <strong>Centro y Sur</strong> (zona sísmica alta) el tabique bien reforzado da mayor seguridad. En ambos casos, el refuerzo vertical con varilla es obligatorio según el Reglamento de Construcciones local.</p>'}
 ];
 
+// ── GUIDE PDF MAP ─────────────────────────────────────────────────────
+var GUIDE_PDFS = {
+  1:'guias/01-fundamentos-del-concreto.pdf',
+  2:'guias/02-instalacion-tuberia-pvc.pdf',
+  3:'guias/03-instalaciones-electricas-residenciales.pdf',
+  4:'guias/04-estructuras-acero-concreto.pdf',
+  5:'guias/05-mamposteria-muros-block.pdf',
+  6:'guias/06-impermeabilizacion-azoteas.pdf',
+  7:'guias/07-cuanto-cuesta-construir-casa-mexico.pdf',
+  8:'guias/08-precio-materiales-construccion-mexico.pdf',
+  9:'guias/09-calcular-cemento-para-losa.pdf',
+  10:'guias/10-costo-remodelar-bano-mexico.pdf',
+  11:'guias/11-costo-pintar-casa-mexico.pdf',
+  12:'guias/12-instalacion-electrica-precios-nom-mexico.pdf',
+  13:'guias/13-porcelanato-vs-ceramica-mexico.pdf',
+  14:'guias/14-presupuesto-cocina-pequena-mexico.pdf',
+  15:'guias/15-impermeabilizacion-azotea-costos-mexico.pdf',
+  16:'guias/16-block-cemento-vs-ladrillo-mexico.pdf'
+};
+
 // ── TEMPLATES DATA ───────────────────────────────────────────────────
 
 var TEMPLATES = {
@@ -1889,20 +1909,85 @@ function renderGuides(cat) {
 function showGuide(id) {
   var g = GUIDES.find(function(x){ return x.id === id; });
   if (!g) return;
-  document.getElementById('guide-detail-content').innerHTML =
-    '<div style="position:relative;border-radius:0.75rem;overflow:hidden;margin-bottom:2rem;height:18rem;">'
+  var pdfPath = GUIDE_PDFS[g.id] || null;
+  var pdfFileName = g.title.replace(/[^a-zA-Z0-9\u00C0-\u024F ]/g,'').replace(/\s+/g,'-').toLowerCase() + '.pdf';
+
+  /* ── Hero ── */
+  var heroHtml =
+    '<div style="position:relative;border-radius:0.85rem;overflow:hidden;margin-bottom:1.8rem;height:18rem;">'
     +'<img src="'+g.img+'" alt="'+g.title+'" style="width:100%;height:100%;object-fit:cover;" />'
-    +'<div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.65),transparent);"></div>'
-    +'<div style="position:absolute;bottom:1.5rem;left:1.5rem;">'
-    +'<span style="background:var(--primary);color:white;padding:0.22rem 0.7rem;border-radius:999px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;display:inline-block;margin-bottom:0.55rem;">'+g.catLabel+'</span>'
-    +'<h1 style="font-size:clamp(1.5rem,4vw,2.3rem);color:white;text-shadow:0 2px 8px rgba(0,0,0,0.4);">'+g.title+'</h1>'
-    +'</div></div>'
-    +'<div class="card" style="padding:2rem;"><div class="prose">'+g.content+'</div>'
-    +'<hr style="border:none;border-top:1px solid var(--border);margin:1.5rem 0;" />'
-    +'<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">'
-    +'<button class="btn btn-primary" onclick="showPage(\'calculator\')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/></svg> Calcular Estimación</button>'
-    +'<button class="btn btn-ghost" onclick="showPage(\'guides\')">Ver más guías</button>'
+    +'<div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(10,18,40,0.82) 0%,rgba(10,18,40,0.2) 55%,transparent 100%);"></div>'
+    +'<div style="position:absolute;bottom:1.5rem;left:1.5rem;right:1.5rem;">'
+    +'<span style="background:var(--primary);color:white;padding:0.22rem 0.7rem;border-radius:999px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;display:inline-block;margin-bottom:0.6rem;">'+g.catLabel+'</span>'
+    +'<h1 style="font-size:clamp(1.4rem,4vw,2.1rem);color:white;text-shadow:0 2px 10px rgba(0,0,0,0.5);line-height:1.2;margin:0;">'+g.title+'</h1>'
     +'</div></div>';
+
+  /* ── Resumen + descarga ── */
+  var summaryHtml =
+    '<div class="card" style="padding:0;overflow:hidden;margin-bottom:1.5rem;border:1.5px solid var(--border);">'
+
+    /* Cabecera azul del card */
+    +'<div style="background:linear-gradient(135deg,var(--primary),hsl(215,100%,35%));padding:1.5rem 2rem;">'
+    +'<p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:rgba(255,255,255,0.65);margin-bottom:0.4rem;">Guía profesional BuildSmart</p>'
+    +'<p style="color:rgba(255,255,255,0.9);font-size:0.95rem;line-height:1.65;margin:0;">'+g.excerpt+'</p>'
+    +'</div>'
+
+    /* Cuerpo: metadata + botón descarga */
+    +'<div style="padding:1.5rem 2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1.2rem;background:var(--card);">'
+
+    /* Metadata chips */
+    +'<div style="display:flex;flex-wrap:wrap;gap:0.6rem;">'
+    +'<span style="display:inline-flex;align-items:center;gap:0.35rem;font-size:0.78rem;color:var(--muted-fg);background:var(--muted);padding:0.3rem 0.75rem;border-radius:999px;">'
+    +'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg> Documento PDF</span>'
+    +'<span style="display:inline-flex;align-items:center;gap:0.35rem;font-size:0.78rem;color:var(--muted-fg);background:var(--muted);padding:0.3rem 0.75rem;border-radius:999px;">'
+    +'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg> Descarga inmediata</span>'
+    +'<span style="display:inline-flex;align-items:center;gap:0.35rem;font-size:0.78rem;color:var(--muted-fg);background:var(--muted);padding:0.3rem 0.75rem;border-radius:999px;">'
+    +'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Datos verificados 2025</span>'
+    +'</div>'
+
+    /* Botón de descarga */
+    +(pdfPath
+      ? '<a href="'+pdfPath+'" download="'+pdfFileName+'" style="display:inline-flex;align-items:center;gap:0.55rem;background:var(--primary);color:white;font-weight:700;font-size:0.9rem;padding:0.75rem 1.6rem;border-radius:0.55rem;text-decoration:none;box-shadow:0 4px 16px rgba(0,90,255,0.28);transition:all 0.2s;" onmouseover="this.style.opacity=\'0.88\';this.style.transform=\'translateY(-1px)\'" onmouseout="this.style.opacity=\'1\';this.style.transform=\'none\'">'
+        +'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>'
+        +' Descargar Guía PDF</a>'
+      : '')
+    +'</div></div>';
+
+  /* ── Contenido de la guía ── */
+  var contentHtml =
+    '<div class="card" style="padding:2rem;">'
+    +'<h2 style="font-size:1rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted-fg);margin-bottom:1.2rem;">Contenido de la guía</h2>'
+    +'<div class="prose">'+g.content+'</div>'
+    +'<hr style="border:none;border-top:1px solid var(--border);margin:1.8rem 0;" />'
+
+    /* CTA inferior */
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;" class="mob-grid-1">'
+
+    /* Calcular */
+    +'<div style="background:linear-gradient(135deg,rgba(0,90,255,0.06),rgba(0,90,255,0.02));border:1.5px solid rgba(0,90,255,0.15);border-radius:0.75rem;padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:0.6rem;">'
+    +'<p style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--primary);">¿Listo para presupuestar?</p>'
+    +'<p style="font-size:0.85rem;color:var(--muted-fg);line-height:1.55;margin:0;">Usa nuestra calculadora para obtener un presupuesto detallado con los precios de esta guía.</p>'
+    +'<button class="btn btn-primary" onclick="showPage(\'calculator\')" style="margin-top:0.4rem;align-self:flex-start;">'
+    +'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>'
+    +' Abrir Calculadora</button>'
+    +'</div>'
+
+    /* Descargar de nuevo */
+    +(pdfPath
+      ? '<div style="background:var(--muted);border:1.5px solid var(--border);border-radius:0.75rem;padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:0.6rem;">'
+        +'<p style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted-fg);">Llevar la guía contigo</p>'
+        +'<p style="font-size:0.85rem;color:var(--muted-fg);line-height:1.55;margin:0;">Descarga el PDF y consúltala sin internet en obra, en la ferretería o donde la necesites.</p>'
+        +'<a href="'+pdfPath+'" download="'+pdfFileName+'" class="btn btn-outline" style="margin-top:0.4rem;align-self:flex-start;text-decoration:none;">'
+        +'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>'
+        +' Descargar PDF</a>'
+        +'</div>'
+      : '<div style="background:var(--muted);border:1.5px solid var(--border);border-radius:0.75rem;padding:1.25rem 1.5rem;">'
+        +'<button class="btn btn-ghost" onclick="showPage(\'guides\')">Ver más guías</button>'
+        +'</div>')
+
+    +'</div></div>';
+
+  document.getElementById('guide-detail-content').innerHTML = heroHtml + summaryHtml + contentHtml;
   document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
   document.getElementById('page-guide-detail').classList.add('active');
   window.scrollTo({top:0,behavior:'smooth'});
