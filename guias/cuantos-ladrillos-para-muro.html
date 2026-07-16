@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>¿Cuántos ladrillos necesito para un muro? Calculadora — BuildSmart</title>
+  <meta name="description" content="Calcula cuántos ladrillos o blocks necesitas para levantar un muro. Fórmula con juntas, desperdicio y mezcla de mortero. Calculadora interactiva para México 2026." />
+  <link rel="canonical" href="https://buildsmart.replit.app/guias/cuantos-ladrillos-para-muro.html" />
+  <meta name="robots" content="index, follow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root{--bg:#f5f7fa;--fg:#0f172a;--card:#fff;--muted:#e9edf2;--muted-fg:#64748b;--border:#dde3ec;--primary:hsl(215,100%,45%);--radius:0.5rem;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--fg);background-image:linear-gradient(to right,rgba(15,23,42,0.05) 1px,transparent 1px),linear-gradient(to bottom,rgba(15,23,42,0.05) 1px,transparent 1px);background-size:40px 40px;background-attachment:fixed;min-height:100vh;}
+    h1,h2,h3{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:-0.02em;}
+    nav{background:rgba(255,255,255,0.93);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:40;height:60px;display:flex;align-items:center;}
+    .nav-inner{max-width:900px;margin:0 auto;width:100%;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;}
+    .brand{font-family:'Oswald',sans-serif;font-size:1.25rem;font-weight:700;text-decoration:none;color:var(--fg);display:flex;align-items:center;gap:0.45rem;text-transform:none;}
+    .brand-icon{background:var(--primary);color:#fff;border-radius:6px;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:800;}
+    .nav-links{display:flex;gap:1.2rem;align-items:center;}
+    .nav-links a{color:var(--muted-fg);font-size:0.85rem;font-weight:500;text-decoration:none;}
+    .nav-links a:hover{color:var(--primary);}
+    .btn-calc{background:var(--primary);color:#fff;border:none;border-radius:var(--radius);padding:0.4rem 1rem;font-size:0.82rem;font-weight:700;cursor:pointer;text-decoration:none;font-family:'Oswald',sans-serif;}
+    main{max-width:900px;margin:0 auto;padding:2.5rem 1.5rem 5rem;}
+    .breadcrumb{font-size:0.78rem;color:var(--muted-fg);margin-bottom:1.5rem;display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap;}
+    .breadcrumb a{color:var(--muted-fg);text-decoration:none;}
+    .tag{display:inline-block;background:rgba(0,90,255,0.08);color:var(--primary);font-size:0.72rem;font-weight:700;padding:0.2rem 0.6rem;border-radius:2rem;letter-spacing:0.04em;text-transform:uppercase;margin-bottom:1rem;}
+    h1{font-size:clamp(1.8rem,5vw,2.8rem);line-height:1.1;margin-bottom:1rem;}
+    .lead{font-size:1.08rem;color:var(--muted-fg);line-height:1.7;margin-bottom:2rem;}
+    .answer-box{background:linear-gradient(135deg,rgba(0,90,255,0.06),rgba(0,90,255,0.02));border:1px solid rgba(0,90,255,0.18);border-radius:0.75rem;padding:1.5rem 1.75rem;margin-bottom:2.5rem;}
+    .answer-box h2{font-size:1rem;color:var(--primary);margin-bottom:0.75rem;font-family:'Oswald',sans-serif;text-transform:uppercase;}
+    .answer-box p{font-size:1.05rem;line-height:1.7;}
+    .calc-box{background:var(--card);border:1px solid var(--border);border-radius:1rem;padding:1.75rem;margin:2rem 0;}
+    .calc-box h3{font-size:1.2rem;margin-bottom:1.25rem;color:var(--primary);}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;}
+    label{font-size:0.82rem;font-weight:600;color:var(--muted-fg);display:block;margin-bottom:0.35rem;text-transform:uppercase;letter-spacing:0.04em;}
+    input,select{width:100%;border:1px solid var(--border);border-radius:var(--radius);padding:0.6rem 0.85rem;font-size:0.95rem;font-family:'Inter',sans-serif;background:#fff;color:var(--fg);}
+    input:focus,select:focus{outline:2px solid var(--primary);}
+    .calc-btn{background:var(--primary);color:#fff;border:none;border-radius:var(--radius);padding:0.75rem 2rem;font-size:1rem;font-family:'Oswald',sans-serif;font-weight:700;cursor:pointer;width:100%;margin-top:0.5rem;text-transform:uppercase;}
+    .result-box{background:var(--fg);color:#fff;border-radius:0.75rem;padding:1.5rem;margin-top:1.25rem;display:none;}
+    .result-box h4{font-family:'Oswald',sans-serif;font-size:1rem;margin-bottom:1rem;color:rgba(255,255,255,0.7);font-weight:400;text-transform:uppercase;}
+    .result-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;margin-bottom:0.75rem;}
+    .result-item{background:rgba(255,255,255,0.07);border-radius:0.5rem;padding:0.75rem;text-align:center;}
+    .result-item .rval{font-size:1.5rem;font-family:'Oswald',sans-serif;font-weight:700;}
+    .result-item .rlabel{font-size:0.7rem;color:rgba(255,255,255,0.6);margin-top:0.2rem;}
+    .result-note{font-size:0.82rem;color:rgba(255,255,255,0.6);margin-top:0.75rem;line-height:1.5;}
+    h2.section{font-size:1.4rem;margin:2.5rem 0 1rem;}
+    p{line-height:1.7;margin-bottom:1rem;}
+    table{width:100%;border-collapse:collapse;margin-bottom:2rem;font-size:0.92rem;}
+    th{background:var(--fg);color:#fff;padding:0.65rem 1rem;text-align:left;font-family:'Oswald',sans-serif;text-transform:uppercase;font-size:0.82rem;}
+    td{padding:0.65rem 1rem;border-bottom:1px solid var(--border);}
+    tr:nth-child(even) td{background:rgba(0,0,0,0.02);}
+    .tip-box{background:#fffbeb;border:1px solid #fde68a;border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1.5rem;font-size:0.9rem;line-height:1.65;}
+    .tip-box strong{color:#92400e;}
+    .warn-box{background:#fef2f2;border:1px solid #fecaca;border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1.5rem;font-size:0.9rem;line-height:1.65;}
+    .warn-box strong{color:#991b1b;}
+    .compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:2rem;}
+    .compare-card{background:var(--card);border:1px solid var(--border);border-radius:0.75rem;padding:1.5rem;}
+    .compare-card h4{font-family:'Oswald',sans-serif;font-size:1.1rem;margin-bottom:0.75rem;color:var(--fg);}
+    .compare-card ul{padding-left:1.25rem;font-size:0.9rem;line-height:1.8;color:var(--muted-fg);}
+    .compare-card ul li strong{color:var(--fg);}
+    .steps{counter-reset:step;list-style:none;padding:0;margin-bottom:2rem;}
+    .steps li{counter-increment:step;padding:0.9rem 1rem 0.9rem 3.5rem;border-bottom:1px solid var(--border);position:relative;line-height:1.65;font-size:0.95rem;}
+    .steps li::before{content:counter(step);position:absolute;left:0.75rem;top:0.85rem;background:var(--primary);color:#fff;width:1.7rem;height:1.7rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.78rem;font-weight:700;font-family:'Oswald',sans-serif;}
+    .cta-box{background:linear-gradient(135deg,var(--primary),hsl(215,100%,35%));border-radius:1rem;padding:2rem;text-align:center;margin:3rem 0;}
+    .cta-box h3{color:#fff;font-size:1.4rem;margin-bottom:0.6rem;}
+    .cta-box p{color:rgba(255,255,255,0.85);margin-bottom:1.25rem;}
+    .cta-box a{display:inline-block;background:#fff;color:var(--primary);font-family:'Oswald',sans-serif;font-weight:700;font-size:1rem;padding:0.75rem 2rem;border-radius:var(--radius);text-decoration:none;text-transform:uppercase;}
+    .related h3{font-size:1.1rem;margin-bottom:1rem;}
+    .related-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:0.75rem;}
+    .related-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;text-decoration:none;color:var(--fg);font-size:0.9rem;font-weight:600;}
+    .related-card:hover{border-color:var(--primary);}
+    .related-card span{font-size:0.78rem;color:var(--muted-fg);display:block;margin-top:0.25rem;}
+    footer{text-align:center;padding:2rem;font-size:0.78rem;color:var(--muted-fg);border-top:1px solid var(--border);}
+    @media(max-width:600px){.nav-links{display:none;}.form-row{grid-template-columns:1fr;}.result-grid{grid-template-columns:1fr;}.compare-grid{grid-template-columns:1fr;}}
+  </style>
+</head>
+<body>
+<nav><div class="nav-inner">
+  <a href="/" class="brand"><span class="brand-icon">B</span>Build<span style="color:var(--primary);">Smart</span></a>
+  <div class="nav-links"><a href="/#guias">Guías</a><a href="/#calculadora">Calculadora</a><a href="/" class="btn-calc">Inicio</a></div>
+</div></nav>
+<main>
+  <div class="breadcrumb"><a href="/">Inicio</a> › <a href="/#guias">Guías</a> › <a href="/#materiales">Materiales</a> › Ladrillos para muro</div>
+  <div class="tag">🧱 Transversal — Calculable</div>
+  <h1>¿Cuántos ladrillos necesito para un muro?</h1>
+  <p class="lead">Calcula la cantidad exacta de ladrillos o blocks de concreto para cualquier muro, con juntas de mortero, puertas y ventanas descontadas, y porcentaje de desperdicio. Precios actualizados México 2026.</p>
+
+  <div class="answer-box">
+    <h2>Respuesta rápida</h2>
+    <p>Para un <strong>muro de 3 × 2.5 m (7.5 m²)</strong> con ladrillo tabique rojo estándar (24 × 12 × 7 cm) y junta de 1.5 cm necesitas aproximadamente <strong>390 piezas</strong>, incluyendo un 5 % de desperdicio. Con block hueco de 40 × 20 × 15 cm, el mismo muro requiere solo <strong>93 blocks</strong>.</p>
+  </div>
+
+  <!-- CALCULADORA -->
+  <div class="calc-box">
+    <h3>🧮 Calculadora de ladrillos y blocks</h3>
+    <div class="form-row">
+      <div><label for="muro-largo">Largo del muro (m)</label><input type="number" id="muro-largo" value="3" min="0.5" step="0.5" /></div>
+      <div><label for="muro-alto">Alto del muro (m)</label><input type="number" id="muro-alto" value="2.5" min="0.5" step="0.5" /></div>
+    </div>
+    <div class="form-row">
+      <div>
+        <label for="tipo-pieza">Tipo de pieza</label>
+        <select id="tipo-pieza" onchange="actualizarDims()">
+          <option value="tabique-std">Tabique rojo estándar (24×12×7 cm)</option>
+          <option value="tabique-reb">Tabique rebloque (28×14×10 cm)</option>
+          <option value="block-15">Block hueco 15 cm (40×20×15 cm)</option>
+          <option value="block-10">Block hueco 10 cm (40×20×10 cm)</option>
+          <option value="block-20">Block pesado 20 cm (40×20×20 cm)</option>
+          <option value="custom">Dimensiones personalizadas</option>
+        </select>
+      </div>
+      <div>
+        <label for="junta">Junta de mortero (cm)</label>
+        <select id="junta">
+          <option value="1.0">1.0 cm</option>
+          <option value="1.5" selected>1.5 cm (estándar)</option>
+          <option value="2.0">2.0 cm</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row" id="custom-dims" style="display:none;">
+      <div><label for="pieza-largo">Largo pieza (cm)</label><input type="number" id="pieza-largo" value="24" /></div>
+      <div><label for="pieza-alto">Alto pieza (cm)</label><input type="number" id="pieza-alto" value="7" /></div>
+    </div>
+    <div class="form-row">
+      <div><label for="area-huecos">Área de puertas/ventanas (m²)</label><input type="number" id="area-huecos" value="0" min="0" step="0.1" placeholder="Ej: 1.8 para una puerta" /></div>
+      <div><label for="desperdicio">Desperdicio adicional (%)</label>
+        <select id="desperdicio">
+          <option value="3">3% — maestro experimentado</option>
+          <option value="5" selected>5% — estándar recomendado</option>
+          <option value="8">8% — trabajo con cortes/esquinas</option>
+          <option value="10">10% — proyecto con muchos detalles</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div><label for="precio-pieza">Precio por pieza ($MXN)</label><input type="number" id="precio-pieza" value="5" min="1" step="0.5" /></div>
+      <div><label for="precio-saco">Precio saco mortero ($MXN)</label><input type="number" id="precio-saco" value="120" min="50" step="5" /></div>
+    </div>
+    <button class="calc-btn" onclick="calcularLadrillos()">Calcular cantidad</button>
+    <div class="result-box" id="result-ladrillos">
+      <h4>Materiales necesarios para tu muro</h4>
+      <div class="result-grid">
+        <div class="result-item"><div class="rval" id="r-piezas">—</div><div class="rlabel" id="r-tipo-label">piezas</div></div>
+        <div class="result-item"><div class="rval" id="r-m2">—</div><div class="rlabel">m² de muro neto</div></div>
+        <div class="result-item"><div class="rval" id="r-sacos">—</div><div class="rlabel">sacos de mortero</div></div>
+      </div>
+      <div class="result-item" style="background:rgba(255,255,255,0.07);border-radius:0.5rem;padding:0.75rem;text-align:center;margin-top:0.75rem;">
+        <div class="rval" id="r-costo-muro">—</div><div class="rlabel">costo estimado materiales</div>
+      </div>
+      <p class="result-note" id="result-note-ladrillos"></p>
+    </div>
+  </div>
+
+  <h2 class="section">Fórmula paso a paso</h2>
+  <p>El número de piezas se calcula dividiendo el área del muro entre el área de cada pieza (incluyendo su junta de mortero en dos lados):</p>
+  <ol class="steps">
+    <li><strong>Área del muro:</strong> largo × alto. Descuenta puertas y ventanas. Ejemplo: 3 × 2.5 = 7.5 m², menos 1 puerta (0.9 × 2.1 = 1.89 m²) = <strong>5.61 m²</strong>.</li>
+    <li><strong>Área de cada pieza con junta:</strong> (largo_pieza + junta) × (alto_pieza + junta). Para tabique estándar con junta 1.5 cm: (24+1.5) × (7+1.5) = 25.5 × 8.5 = <strong>216.75 cm²</strong>.</li>
+    <li><strong>Piezas por m²:</strong> 10,000 cm² ÷ 216.75 cm² ≈ <strong>46 piezas/m²</strong>.</li>
+    <li><strong>Piezas brutas:</strong> 5.61 m² × 46 = 258 piezas.</li>
+    <li><strong>Con desperdicio del 5 %:</strong> 258 × 1.05 ≈ <strong>271 piezas</strong>.</li>
+  </ol>
+
+  <h2 class="section">Rendimiento por tipo de pieza</h2>
+  <table>
+    <thead><tr><th>Tipo de pieza</th><th>Dimensiones</th><th>Piezas por m²</th><th>Precio unit. (MXN)</th></tr></thead>
+    <tbody>
+      <tr><td>Tabique rojo estándar</td><td>24×12×7 cm</td><td>46 piezas</td><td>$3.50–6.00</td></tr>
+      <tr><td>Tabique rebloque</td><td>28×14×10 cm</td><td>29 piezas</td><td>$7.00–10.00</td></tr>
+      <tr><td>Block hueco 10 cm</td><td>40×20×10 cm</td><td>12.5 piezas</td><td>$14–18</td></tr>
+      <tr><td>Block hueco 15 cm</td><td>40×20×15 cm</td><td>12.5 piezas</td><td>$18–24</td></tr>
+      <tr><td>Block pesado 20 cm</td><td>40×20×20 cm</td><td>12.5 piezas</td><td>$24–32</td></tr>
+      <tr><td>Ladrillo de barro artesanal</td><td>25×12×6 cm</td><td>50 piezas</td><td>$4.00–7.50</td></tr>
+    </tbody>
+  </table>
+
+  <h2 class="section">Tabique vs Block: ¿cuál conviene?</h2>
+  <div class="compare-grid">
+    <div class="compare-card">
+      <h4>🧱 Tabique rojo</h4>
+      <ul>
+        <li><strong>Costo por m²:</strong> $180–300 MXN</li>
+        <li><strong>Ventajas:</strong> Mejor aislamiento térmico y acústico; aspecto estético en muros aparentes; alta resistencia a humedad</li>
+        <li><strong>Desventajas:</strong> Más lento de pegar (46 pzas/m²); más peso en la estructura; requiere más mortero</li>
+        <li><strong>Ideal para:</strong> Muros exteriores, recámaras, muros aparentes</li>
+      </ul>
+    </div>
+    <div class="compare-card">
+      <h4>🏗️ Block de concreto</h4>
+      <ul>
+        <li><strong>Costo por m²:</strong> $250–400 MXN (con mortero y mano de obra)</li>
+        <li><strong>Ventajas:</strong> Más rápido de pegar (12.5 pzas/m²); menos junta = menos mortero; buena resistencia estructural</li>
+        <li><strong>Desventajas:</strong> Menor aislamiento; requiere repello para acabado final; más pesado unitariamente</li>
+        <li><strong>Ideal para:</strong> Bodegas, muros de carga, muros de colindancia</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2 class="section">Mortero: cuánto necesitas</h2>
+  <p>El mortero de pega (cemento + arena en proporción 1:4 o 1:5) es el otro insumo clave. La cantidad depende del tamaño de la junta y el tipo de pieza:</p>
+  <table>
+    <thead><tr><th>Tipo de pieza</th><th>Sacos de cemento por m²</th><th>Arena por m²</th></tr></thead>
+    <tbody>
+      <tr><td>Tabique estándar</td><td>0.25 sacos</td><td>0.025 m³</td></tr>
+      <tr><td>Tabique rebloque</td><td>0.18 sacos</td><td>0.018 m³</td></tr>
+      <tr><td>Block hueco 15 cm</td><td>0.10 sacos</td><td>0.010 m³</td></tr>
+      <tr><td>Block pesado 20 cm</td><td>0.08 sacos</td><td>0.008 m³</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:0.82rem;color:var(--muted-fg);">*Con junta de 1.5 cm y proporción 1:4 cemento-arena. Un saco de mortero premezclado (25 kg) rinde aprox. 0.015 m³ de mezcla.</p>
+
+  <div class="tip-box">
+    <strong>💡 Tip de compra:</strong> Siempre pide al proveedor el <em>número de piezas por millar</em> para verificar que coincida con tu cálculo. Antes de pagar, revisa que las piezas no lleguen quebradas — más del 3 % de rotura en la entrega es motivo de rechazo o descuento.
+  </div>
+
+  <h2 class="section">Mano de obra: cuánto cobra un albañil</h2>
+  <table>
+    <thead><tr><th>Trabajo</th><th>Rendimiento por jornada</th><th>Costo mano de obra (MXN)</th></tr></thead>
+    <tbody>
+      <tr><td>Pega de tabique estándar</td><td>8–12 m² por día</td><td>$600–900/día</td></tr>
+      <tr><td>Pega de block 15 cm</td><td>15–20 m² por día</td><td>$700–1,000/día</td></tr>
+      <tr><td>Repello / aplanado</td><td>8–12 m² por día</td><td>$500–800/día</td></tr>
+    </tbody>
+  </table>
+
+  <div class="warn-box">
+    <strong>⚠️ Precaución con muros de carga:</strong> Si el muro que construyes forma parte de la estructura principal de la casa (sostiene losas o vigas), el cálculo de espesor, tipo de block y refuerzo debe hacerlo un ingeniero civil. Un muro mal dimensionado puede colapsar bajo carga lateral o sísmica.
+  </div>
+
+  <div class="cta-box">
+    <h3>Suma todos tus materiales en un proyecto</h3>
+    <p>Calcula muros, losas, acabados y remodelaciones en una sola estimación con BuildSmart.</p>
+    <a href="/#calculadora">Usar calculadora de BuildSmart</a>
+  </div>
+
+  <section class="related">
+    <h3>Guías relacionadas</h3>
+    <div class="related-grid">
+      <a class="related-card" href="cuanto-cemento-para-losa.html">¿Cuánto cemento para una losa?<span>Bolsas, arena y grava por área y espesor</span></a>
+      <a class="related-card" href="cemento-para-pisar-terraza.html">Cemento para pisar terraza<span>Proporción 1:2:3 para pisos exteriores</span></a>
+      <a class="related-card" href="costo-remodelar-cocina-mexico.html">Costo de remodelación de cocina<span>Presupuesto completo 2026</span></a>
+      <a class="related-card" href="costo-remodelar-bano-completo-mexico.html">Costo de remodelación de baño<span>Materiales y mano de obra</span></a>
+    </div>
+  </section>
+</main>
+<footer>© 2026 BuildSmart · Guías de construcción para México · <a href="/" style="color:var(--muted-fg);">Inicio</a></footer>
+
+<script>
+const PIEZAS={
+  'tabique-std':{largo:24,alto:7,label:'tabique rojo estándar',precio:5},
+  'tabique-reb':{largo:28,alto:10,label:'tabique rebloque',precio:8.5},
+  'block-15':{largo:40,alto:20,label:'block hueco 15cm',precio:21},
+  'block-10':{largo:40,alto:20,label:'block hueco 10cm',precio:16},
+  'block-20':{largo:40,alto:20,label:'block pesado 20cm',precio:28},
+  'custom':{largo:24,alto:7,label:'pieza personalizada',precio:5}
+};
+
+function actualizarDims(){
+  const tipo=document.getElementById('tipo-pieza').value;
+  const customDiv=document.getElementById('custom-dims');
+  customDiv.style.display=tipo==='custom'?'grid':'none';
+  if(tipo!=='custom'){
+    document.getElementById('precio-pieza').value=PIEZAS[tipo].precio;
+  }
+}
+
+function calcularLadrillos(){
+  const largo=parseFloat(document.getElementById('muro-largo').value)||0;
+  const alto=parseFloat(document.getElementById('muro-alto').value)||0;
+  const junta=parseFloat(document.getElementById('junta').value)||1.5;
+  const huecos=parseFloat(document.getElementById('area-huecos').value)||0;
+  const desperdicio=parseFloat(document.getElementById('desperdicio').value)||5;
+  const pPieza=parseFloat(document.getElementById('precio-pieza').value)||5;
+  const pSaco=parseFloat(document.getElementById('precio-saco').value)||120;
+  const tipo=document.getElementById('tipo-pieza').value;
+
+  if(largo<=0||alto<=0){alert('Ingresa dimensiones válidas.');return;}
+
+  let pLargo,pAlto,label;
+  if(tipo==='custom'){
+    pLargo=parseFloat(document.getElementById('pieza-largo').value)||24;
+    pAlto=parseFloat(document.getElementById('pieza-alto').value)||7;
+    label='pieza personalizada';
+  } else {
+    pLargo=PIEZAS[tipo].largo;
+    pAlto=PIEZAS[tipo].alto;
+    label=PIEZAS[tipo].label;
+  }
+
+  const areaMuro=Math.max(0,largo*alto-huecos);
+  const areaPieza=((pLargo+junta)*(pAlto+junta))/10000; // m²
+  const piezasPorM2=1/areaPieza;
+  const piezasNetas=Math.ceil(areaMuro*piezasPorM2);
+  const piezasBrutas=Math.ceil(piezasNetas*(1+desperdicio/100));
+
+  // Mortero: ~0.25 sacos/m² para tabique, ~0.10 para block
+  const factorMortero=tipo.startsWith('block')?0.10:0.22;
+  const sacos=Math.ceil(areaMuro*factorMortero);
+
+  const costoTotal=piezasBrutas*pPieza+sacos*pSaco;
+
+  document.getElementById('r-piezas').textContent=piezasBrutas.toLocaleString('es-MX');
+  document.getElementById('r-tipo-label').textContent=label;
+  document.getElementById('r-m2').textContent=areaMuro.toFixed(2)+' m²';
+  document.getElementById('r-sacos').textContent=sacos;
+  document.getElementById('r-costo-muro').textContent='$'+Math.round(costoTotal).toLocaleString('es-MX')+' MXN';
+  document.getElementById('result-note-ladrillos').textContent=
+    piezasPorM2.toFixed(1)+' piezas/m² · '+piezasNetas+' piezas netas + '+desperdicio+'% desperdicio = '+
+    piezasBrutas+' piezas totales. Junta: '+junta+' cm. Mortero: ~'+factorMortero+' sacos/m².';
+  document.getElementById('result-ladrillos').style.display='block';
+}
+</script>
+</body>
+</html>

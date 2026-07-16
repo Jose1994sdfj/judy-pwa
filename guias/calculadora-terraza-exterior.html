@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculadora de Costo de Terraza Exterior — BuildSmart México</title>
+  <meta name="description" content="Calcula el costo de construir una terraza exterior en México. Elige el tipo de piso y techado para obtener un presupuesto estimado al instante. Gratis." />
+  <link rel="canonical" href="https://buildsmart.replit.app/guias/calculadora-terraza-exterior.html" />
+  <meta name="robots" content="index, follow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root{--bg:#f5f7fa;--fg:#0f172a;--card:#fff;--muted:#e9edf2;--muted-fg:#64748b;--border:#dde3ec;--primary:hsl(215,100%,45%);--secondary:hsl(30,100%,50%);--radius:0.5rem;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--fg);background-image:linear-gradient(to right,rgba(15,23,42,0.05) 1px,transparent 1px),linear-gradient(to bottom,rgba(15,23,42,0.05) 1px,transparent 1px);background-size:40px 40px;background-attachment:fixed;min-height:100vh;}
+    h1,h2,h3{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:-0.02em;}
+    nav{background:rgba(255,255,255,0.93);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:40;height:60px;display:flex;align-items:center;}
+    .nav-inner{max-width:960px;margin:0 auto;width:100%;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;}
+    .brand{font-family:'Oswald',sans-serif;font-size:1.25rem;font-weight:700;text-decoration:none;color:var(--fg);display:flex;align-items:center;gap:0.45rem;text-transform:none;}
+    .brand-icon{background:var(--primary);color:#fff;border-radius:6px;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:800;}
+    .nav-links{display:flex;gap:1.2rem;align-items:center;}
+    .nav-links a{color:var(--muted-fg);font-size:0.85rem;font-weight:500;text-decoration:none;}
+    .nav-links a:hover{color:var(--primary);}
+    .btn-nav{background:var(--primary);color:#fff;border:none;border-radius:var(--radius);padding:0.4rem 1rem;font-size:0.82rem;font-weight:700;cursor:pointer;text-decoration:none;font-family:'Oswald',sans-serif;}
+    main{max-width:960px;margin:0 auto;padding:2.5rem 1.5rem 5rem;}
+    .breadcrumb{font-size:0.78rem;color:var(--muted-fg);margin-bottom:1.5rem;display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap;}
+    .breadcrumb a{color:var(--muted-fg);text-decoration:none;}
+    .hero{text-align:center;margin-bottom:2.5rem;}
+    .tag{display:inline-block;background:rgba(0,90,255,0.08);color:var(--primary);font-size:0.72rem;font-weight:700;padding:0.2rem 0.6rem;border-radius:2rem;letter-spacing:0.04em;text-transform:uppercase;margin-bottom:1rem;}
+    h1{font-size:clamp(2rem,5vw,3rem);line-height:1.1;margin-bottom:0.75rem;}
+    .lead{font-size:1.05rem;color:var(--muted-fg);line-height:1.6;max-width:600px;margin:0 auto;}
+    .calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:2rem;}
+    .panel{background:var(--card);border:1px solid var(--border);border-radius:1rem;padding:1.75rem;}
+    .panel h2{font-size:1.1rem;margin-bottom:1.5rem;}
+    .form-group{margin-bottom:1.1rem;}
+    label{font-size:0.78rem;font-weight:600;color:var(--muted-fg);display:block;margin-bottom:0.35rem;text-transform:uppercase;letter-spacing:0.04em;}
+    input,select{width:100%;border:1px solid var(--border);border-radius:var(--radius);padding:0.6rem 0.85rem;font-size:0.95rem;font-family:'Inter',sans-serif;background:#fff;color:var(--fg);}
+    input:focus,select:focus{outline:2px solid var(--primary);}
+    .calc-btn{background:var(--primary);color:#fff;border:none;border-radius:var(--radius);padding:0.85rem;font-size:1.05rem;font-family:'Oswald',sans-serif;font-weight:700;cursor:pointer;width:100%;margin-top:1rem;text-transform:uppercase;}
+    .result-panel{background:var(--fg);color:#fff;border-radius:1rem;padding:2rem;display:none;}
+    .result-panel.show{display:block;}
+    .result-total{font-size:3rem;font-family:'Oswald',sans-serif;font-weight:700;margin:0.5rem 0 1.5rem;}
+    .result-range{font-size:1rem;color:rgba(255,255,255,0.7);margin-bottom:1.5rem;}
+    .result-rows{display:flex;flex-direction:column;gap:0.5rem;}
+    .result-row{display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.06);border-radius:0.5rem;padding:0.65rem 1rem;font-size:0.88rem;}
+    .result-row .label{color:rgba(255,255,255,0.75);}
+    .result-row .val{font-weight:700;}
+    .placeholder{background:linear-gradient(135deg,rgba(0,90,255,0.04),rgba(0,90,255,0.01));border:1px dashed var(--border);border-radius:1rem;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--muted-fg);}
+    footer{text-align:center;padding:2rem;font-size:0.78rem;color:var(--muted-fg);border-top:1px solid var(--border);margin-top:3rem;}
+    @media(max-width:700px){.calc-grid{grid-template-columns:1fr;}.nav-links{display:none;}}
+  </style>
+</head>
+<body>
+<nav><div class="nav-inner">
+  <a href="/" class="brand"><span class="brand-icon">B</span>Build<span style="color:var(--primary);">Smart</span></a>
+  <div class="nav-links"><a href="/#guias">Guías</a><a href="/guias/costo-terraza-madera-vs-concreto.html">Costos de terraza</a><a href="/" class="btn-nav">Inicio</a></div>
+</div></nav>
+<main>
+  <div class="breadcrumb"><a href="/">Inicio</a> › <a href="/#guias">Guías</a> › <a href="/#terraza">Terraza</a> › Calculadora</div>
+  <div class="hero">
+    <div class="tag">🌿 Terraza — Calculadora</div>
+    <h1>Calculadora de Costo de Terraza Exterior</h1>
+    <p class="lead">Ingresa los metros cuadrados, el tipo de piso y techado para obtener un presupuesto estimado al instante. Gratis, sin registro.</p>
+  </div>
+  <div class="calc-grid">
+    <div class="panel">
+      <h2>📐 Dimensiones y materiales</h2>
+      <div class="form-group"><label>Área de la terraza (m²)</label><input type="number" id="tr-area" placeholder="ej. 20" step="1" min="1" value="20" /></div>
+      <div class="form-group"><label>Tipo de piso</label>
+        <select id="tr-piso">
+          <option value="600">Concreto simple aplanado</option>
+          <option value="1000">Concreto + porcelanato</option>
+          <option value="1400" selected>Madera de pino tratada</option>
+          <option value="2000">Madera teka / composite</option>
+          <option value="1200">Adocreto / piedra laja</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Techado</label>
+        <select id="tr-techo">
+          <option value="0">Sin techo</option>
+          <option value="650" selected>Policarbonato</option>
+          <option value="500">Lona tensada</option>
+          <option value="500">Lámina galvanizada</option>
+          <option value="1400">Teja de barro</option>
+          <option value="2000">Losa de concreto</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Estructura de soporte</label>
+        <select id="tr-estruc">
+          <option value="0">Sin estructura (adosada a construcción)</option>
+          <option value="800" selected>Estructura metálica ligera</option>
+          <option value="1500">Estructura metálica reforzada</option>
+          <option value="2000">Estructura de concreto</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Ciudad / zona</label>
+        <select id="tr-ciudad">
+          <option value="1.0">Interior del país</option>
+          <option value="1.25" selected>CDMX / GDL / MTY</option>
+          <option value="1.12">Ciudad mediana</option>
+        </select>
+      </div>
+      <button class="calc-btn" onclick="calcTerraza()">Calcular presupuesto</button>
+    </div>
+    <div class="panel result-panel" id="terraza-result">
+      <div style="font-size:0.8rem;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:0.06em;">Presupuesto estimado</div>
+      <div class="result-total" id="tr-total">—</div>
+      <div class="result-range" id="tr-range">—</div>
+      <div class="result-rows" id="tr-rows"></div>
+    </div>
+    <div class="placeholder" id="terraza-placeholder" style="min-height:300px;">
+      <div><div style="font-size:3rem;margin-bottom:1rem;">🌿</div><p style="font-size:0.95rem;">Tu presupuesto<br/>aparecerá aquí</p></div>
+    </div>
+  </div>
+</main>
+<footer>© 2026 BuildSmart México · <a href="/" style="color:var(--primary);">Ir al inicio</a></footer>
+<script>
+function fmt(n){return '$'+Math.round(n).toLocaleString('es-MX');}
+function calcTerraza(){
+  const area=parseFloat(document.getElementById('tr-area').value)||20;
+  const piso=parseFloat(document.getElementById('tr-piso').value);
+  const techo=parseFloat(document.getElementById('tr-techo').value);
+  const estruc=parseFloat(document.getElementById('tr-estruc').value);
+  const ciudad=parseFloat(document.getElementById('tr-ciudad').value);
+  const pisoMin=area*piso*0.8;const pisoMax=area*piso*1.3;
+  const techoMin=techo?area*techo*0.8:0;const techoMax=techo?area*techo*1.3:0;
+  const estrucMin=estruc?area*estruc*0.8:0;const estrucMax=estruc?area*estruc*1.3:0;
+  const impermMin=area*180;const impermMax=area*320;
+  const moMin=area*280;const moMax=area*550;
+  const rows=[['Piso',pisoMin,pisoMax]];
+  if(techo) rows.push(['Techado',techoMin,techoMax]);
+  if(estruc) rows.push(['Estructura',estrucMin,estrucMax]);
+  rows.push(['Impermeabilización',impermMin,impermMax]);
+  rows.push(['Mano de obra',moMin,moMax]);
+  let sumMin=0,sumMax=0;
+  rows.forEach(r=>{sumMin+=r[1];sumMax+=r[2];});
+  sumMin*=ciudad;sumMax*=ciudad;
+  const mid=(sumMin+sumMax)/2;
+  document.getElementById('tr-total').textContent=fmt(mid);
+  document.getElementById('tr-range').textContent='Rango: '+fmt(sumMin)+' – '+fmt(sumMax)+' MXN';
+  document.getElementById('tr-rows').innerHTML=rows.map(r=>`<div class="result-row"><span class="label">${r[0]}</span><span class="val">${fmt(r[1]*ciudad)} – ${fmt(r[2]*ciudad)}</span></div>`).join('');
+  document.getElementById('terraza-result').classList.add('show');
+  document.getElementById('terraza-placeholder').style.display='none';
+}
+</script>
+</body>
+</html>
