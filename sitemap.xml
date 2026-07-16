@@ -37,4 +37,34 @@
   <!-- Calculadora -->
   <url><loc>https://buildsmart.replit.app/#calculadora</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
 
+  <!-- ─── GUÍAS HTML: Pilar Baño ─── -->
+  <url><loc>https://buildsmart.replit.app/guias/costo-remodelar-bano-completo-mexico.html</loc><changefreq>monthly</changefreq><priority>0.88</priority></url>
+  <url><loc>https://buildsmart.replit.app/guias/cuantos-azulejos-para-bano.html</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://buildsmart.replit.app/guias/cambiar-wc-lavabo-sin-tuberia.html</loc><changefreq>monthly</changefreq><priority>0.82</priority></url>
+  <url><loc>https://buildsmart.replit.app/guias/calculadora-remodelacion-bano.html</loc><changefreq>monthly</changefreq><priority>0.90</priority></url>
+  <url><loc>https://buildsmart.replit.app/guias/tiempo-remodelacion-bano-pequeno.html</loc><changefreq>monthly</changefreq><priority>0.80</priority></url>
+
+  <!-- ─── GUÍAS HTML: Pilar Cocina ─── -->
+  <url><loc>https://buildsmart.replit.app/guias/costo-remodelar-cocina-mexico.html</loc><changefreq>monthly</changefreq><priority>0.88</priority></url>
+  <url><loc>https://buildsmart.replit.app/guias/metros-cubierta-granito-cocina.html</loc><changefreq>monthly</changefreq><priority>0.83</priority></url>
+  <url><loc>https://buildsmart.replit.app/guias/presupuesto-cocina-integral.html</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://buildsmart.replit.app/guias/costo-gabinetes-cocina-metro-lineal.html</loc><changefreq>monthly</changefreq><priority>0.83</priority></url>
+  <url><loc>https://buildsmart.replit.app/guias/calculadora-remodelacion-cocina.html</loc><changefreq>monthly</changefreq><priority>0.90</priority></url>
+
+  <!-- ─── GUÍAS HTML: Pilar Terraza ─── -->
+  <url><loc>https://buildsmart.replit.app/guias/costo-terraza-madera-vs-concreto.html</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://buildsmart.replit.app/guias/cemento-para-pisar-terraza.html</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://buildsmart.replit.app/guias/ideas-costos-techar-terraza.html</loc><changefreq>monthly</changefreq><priority>0.83</priority></url>
+  <url><loc>https://buildsmart.replit.app/guias/calculadora-terraza-exterior.html</loc><changefreq>monthly</changefreq><priority>0.88</priority></url>
+
+  <!-- ─── GUÍAS HTML: Pilar Pintura ─── -->
+  <url><loc>https://buildsmart.replit.app/guias/litros-pintura-habitacion.html</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://buildsmart.replit.app/guias/cuanto-cobra-pintor-por-m2-mexico.html</loc><changefreq>monthly</changefreq><priority>0.88</priority></url>
+  <url><loc>https://buildsmart.replit.app/guias/costo-pintar-casa-completa.html</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://buildsmart.replit.app/guias/calculadora-pintura-por-m2.html</loc><changefreq>monthly</changefreq><priority>0.90</priority></url>
+
+  <!-- ─── GUÍAS HTML: Transversales ─── -->
+  <url><loc>https://buildsmart.replit.app/guias/cuanto-cemento-para-losa.html</loc><changefreq>monthly</changefreq><priority>0.88</priority></url>
+  <url><loc>https://buildsmart.replit.app/guias/cuantos-ladrillos-para-muro.html</loc><changefreq>monthly</changefreq><priority>0.88</priority></url>
+
 </urlset>
