@@ -1,0 +1,36 @@
+el modelo de "pillar & cluster" (pilar y clúster temático) — y así es como se ve aplicado a BuildSmart en concreto:
+1. Identifica los "pilares" (temas grandes) de tu nicho
+Para BuildSmart, algo como:
+
+Estimación de costos de construcción
+Cálculo de materiales
+Remodelaciones específicas (baño, cocina, terraza — ya tienes plantillas rápidas para esto)
+Gestión de proyectos de construcción
+
+2. Cada pilar se rompe en preguntas específicas (clúster) — ahí vive tu SEO real
+Ejemplo con "Cálculo de materiales":
+
+¿Cuánto cemento necesito para X m² de losa?
+¿Cómo calcular varilla para una construcción?
+¿Cuánto cuesta remodelar un baño en México 2026?
+¿Cuántos ladrillos necesito para un muro de X metros?
+
+Cada una de estas = una página propia, no un párrafo dentro de otra página. Esa es la clave que preguntas: cuando alguien busca "beneficios del té verde", Google no le muestra un blog genérico de salud, le muestra la página que fue diseñada específicamente para responder esa pregunta y nada más. Tú necesitas ese mismo patrón: una URL, un título, un contenido = una pregunta.
+3. Estructura de URLs recomendada
+buildsmart.com/guias/cuanto-cemento-para-losa
+buildsmart.com/guias/como-calcular-varilla-construccion
+buildsmart.com/guias/costo-remodelar-bano-mexico
+buildsmart.com/calculadora/remodelacion-bano
+buildsmart.com/calculadora/terraza-exterior
+Nota que separo guías (informacional, responde la pregunta) de calculadora (transaccional, la herramienta). Esto es lo que mencioné antes: no mezclar intención en una sola página.
+4. Cada página-guía sigue esta plantilla mínima
+
+Título que sea literalmente la pregunta ("¿Cuánto cemento necesito para colar una losa?")
+Respuesta directa en los primeros 2-3 párrafos (Google premia esto)
+Desarrollo con datos concretos (fórmulas, tablas, ejemplos con números reales)
+CTA hacia la calculadora correspondiente ("Calcula esto automáticamente aquí →")
+Enlaces internos hacia guías relacionadas del mismo pilar
+
+5. El pilar central enlaza a todos sus clústeres
+Una página /guias/calculo-de-materiales que sea el índice general del tema, enlazando a todas las guías específicas. Esto le dice a Google "este sitio domina el tema completo", no solo una pregunta suelta — así construyes autoridad temática (topical authority), que es lo que realmente te hace ganar posiciones con el tiempo.
+En resumen para tu restructuración: en vez de tener "Guías de Construcción" como una sección genérica, conviértela en decenas de páginas individuales, cada una atacando una pregunta específica y real que la gente busca, todas interconectadas y todas apuntando hacia tu calculadora como conversión final.
